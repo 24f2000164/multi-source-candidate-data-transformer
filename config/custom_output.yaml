@@ -1,0 +1,22 @@
+# Custom output projection configuration
+# Example: slimmed-down profile for downstream search indexing.
+schema_version: "1.0"
+
+projection:
+  include:
+    - candidate_id
+    - full_name
+    - emails
+    - skills
+    - experience
+    - education
+
+  # Optional field remapping: canonical_name -> output_name
+  remap:
+    full_name: name
+    emails: email_addresses
+
+options:
+  include_confidence: false
+  include_provenance: false
+  missing_value_strategy: "omit"   # null | omit

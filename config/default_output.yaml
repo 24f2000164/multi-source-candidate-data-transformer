@@ -1,0 +1,24 @@
+# Default output projection configuration
+# Selects the standard Golden Candidate Record fields.
+schema_version: "1.0"
+
+projection:
+  include:
+    - candidate_id
+    - full_name
+    - emails
+    - phones
+    - location
+    - headline
+    - current_company
+    - years_of_experience
+    - skills
+    - experience
+    - education
+    - certifications
+    - links
+
+options:
+  include_confidence: true
+  include_provenance: true
+  missing_value_strategy: "null"   # null | omit

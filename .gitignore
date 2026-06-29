@@ -1,0 +1,92 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.pyd
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.python-version
+
+# Testing
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+nosetests.xml
+test-results/
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Ruff
+.ruff_cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Logs — ignore log files but keep the logs/ directory
+*.log
+logs/*.log
+
+# Runtime output — ignore generated JSON but keep the output/ directory
+output/*.json
+
+# Sample outputs (generated at runtime)
+samples/outputs/*.json
+
+# uv
+.uv/
+uv.lock
+
+
+CLAUDE.md
+AGENTS.md
+planning/
+docs/DEVELOPMENT_RULES.md
+planning/IMPLEMENTATION_PLAN.md
+
+planning/REVIEW_CHECKLIST.md
