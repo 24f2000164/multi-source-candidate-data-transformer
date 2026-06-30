@@ -1,101 +1,212 @@
-"""``AssignmentProjection``: maps a ``Candidate`` to the assignment JSON shape.
+"""``AssignmentProjection``: maps a ``Candidate`` to the assignment JSON schema.
 
-Field inclusion and renaming are declared in ``config/projection_rules.yaml``
-(loaded once at construction time via the shared ``ConfigLoader``). No
-transform expressions or DSLs are supported -- only inclusion and renaming,
-per the Sprint 08 design.
+The YAML-driven field-rename approach used in the previous implementation
+cannot express the structural transformations required by the assignment
+output contract (list wrapping, object decomposition, field combination,
+provenance flattening, skills enrichment). This module replaces that
+approach with explicit mapping logic while preserving the same public
+interface so the CLI composition root requires no changes.
+
+Mapping summary
+---------------
+Internal field                   → Assignment output key
+--------------------------------   --------------------------
+id                               → candidate_id
+first_name + last_name           → full_name
+contact.email                    → emails[]
+contact.phone                    → phones[]
+contact.location (free-text)     → location {city, region, country}
+contact.linkedin_url             → links.linkedin
+contact.github_url               → links.github
+experiences                      → experience
+confidence.score                 → overall_confidence
+skills (list[str])               → skills [{name, confidence, sources}]
+provenance (dict)                → provenance [{field, source, method}]
 """
 
 from pathlib import Path
 from typing import Any
 
-from transformer.config.config_loader import Config, ConfigLoader
-from transformer.config.loader import DEFAULT_CONFIG_DIR
 from transformer.models import Candidate
-from transformer.projection.exceptions import ProjectionError
 from transformer.projection.projection_strategy import ProjectionStrategy
-
-_DEFAULT_RULES_PATH = DEFAULT_CONFIG_DIR / "projection_rules.yaml"
 
 
 class AssignmentProjection(ProjectionStrategy):
-    """Projects a candidate into the assignment-required JSON structure.
+    """Projects a ``Candidate`` into the assignment-required JSON output schema.
 
-    Field selection and renaming are driven entirely by
-    ``projection_rules.yaml`` so that adding or renaming an output field
-    never requires a code change.
+    Transforms the rich internal domain model into the flat canonical schema
+    expected by the assignment evaluator. The internal ``Candidate`` model is
+    never modified; only the serialised output representation changes.
+
+    The constructor accepts (and silently ignores) the legacy ``config_loader``
+    and ``rules_path`` keyword arguments so that the existing CLI composition
+    root (``cli/app.py``) continues to work without modification.
     """
 
     def __init__(
         self,
         *,
-        rules_path: Path = _DEFAULT_RULES_PATH,
-        config_loader: ConfigLoader | None = None,
+        rules_path: Path | None = None,  # accepted for backward-compat, unused
+        config_loader: Any = None,  # accepted for backward-compat, unused
     ) -> None:
-        """Initialise the strategy and eagerly load its field rules.
+        """Initialise the projection strategy.
 
         Args:
-            rules_path: Path to the ``projection_rules.yaml`` file.
-            config_loader: Loader used to read and validate the rules file.
-                A private loader is created if omitted.
-
-        Raises:
-            ProjectionError: If the rules file is missing, invalid, or does
-                not declare a ``fields`` mapping.
+            rules_path: Ignored. Retained for backward compatibility.
+            config_loader: Ignored. Retained for backward compatibility.
         """
-        loader = config_loader or ConfigLoader()
-        config: Config = loader.load(rules_path)
-        fields = config.section("fields")
-        if not isinstance(fields, dict) or not fields:
-            raise ProjectionError(
-                f"projection rules file must declare a non-empty 'fields' "
-                f"mapping: {rules_path}"
-            )
-        rules: dict[str, str] = {}
-        for field_path, rule in fields.items():
-            if not isinstance(rule, dict) or "output" not in rule:
-                raise ProjectionError(
-                    f"projection rule for {field_path!r} must declare an "
-                    f"'output' key: {rules_path}"
-                )
-            rules[field_path] = rule["output"]
-        self._rules: dict[str, str] = rules
+
+    # ------------------------------------------------------------------
+    # Public interface
+    # ------------------------------------------------------------------
 
     def project(self, candidate: Candidate) -> dict[str, Any]:
-        """Project a candidate into the assignment JSON structure.
+        """Map a ``Candidate`` to the assignment output schema.
 
         Args:
-            candidate: The canonical candidate record to project.
+            candidate: The canonical candidate record produced by the pipeline.
 
         Returns:
-            A JSON-safe dict containing only the configured fields, renamed
-            to their configured output keys. Canonical fields that are
-            absent (e.g. an unset optional field) are omitted from the
-            output rather than included as ``null``.
+            A JSON-safe ``dict`` matching the assignment default output schema.
         """
-        source = candidate.model_dump(mode="json")
         output: dict[str, Any] = {}
-        for field_path, output_key in self._rules.items():
-            found, value = _resolve_path(source, field_path)
-            if found and value is not None:
-                output[output_key] = value
+
+        # ── Identity ──────────────────────────────────────────────────────────
+        output["candidate_id"] = str(candidate.id)
+        output["full_name"] = f"{candidate.first_name} {candidate.last_name}".strip()
+
+        # ── Contact ───────────────────────────────────────────────────────────
+        contact = candidate.contact
+        output["emails"] = [contact.email] if (contact and contact.email) else []
+        output["phones"] = [contact.phone] if (contact and contact.phone) else []
+        output["location"] = _parse_location(contact.location if contact else None)
+        output["links"] = {
+            "linkedin": (
+                str(contact.linkedin_url) if (contact and contact.linkedin_url) else ""
+            ),
+            "github": (
+                str(contact.github_url) if (contact and contact.github_url) else ""
+            ),
+        }
+
+        # ── Profile metadata (reserved for future enrichment) ─────────────────
+        output["headline"] = None
+        output["years_experience"] = None
+
+        # ── Skills with confidence + sources ─────────────────────────────────
+        # The internal model stores per-field (not per-skill-item) confidence.
+        # We resolve a single confidence score + source for the "skills" field
+        # and apply it uniformly across every skill tag.
+        output["skills"] = self._map_skills(candidate)
+
+        # ── Experience & Education ────────────────────────────────────────────
+        raw = candidate.model_dump(mode="json")
+        output["experience"] = raw.get("experiences", [])
+        output["education"] = raw.get("education", [])
+
+        # ── Provenance  dict[field, FieldProvenance] → list[{field, source, method}]
+        output["provenance"] = self._map_provenance(candidate)
+
+        # ── Overall confidence ────────────────────────────────────────────────
+        output["overall_confidence"] = (
+            candidate.confidence.score if candidate.confidence else None
+        )
+
         return output
 
+    # ------------------------------------------------------------------
+    # Private helpers
+    # ------------------------------------------------------------------
 
-def _resolve_path(data: dict[str, Any], dotted_path: str) -> tuple[bool, Any]:
-    """Resolve a dot-separated path against a nested dict.
+    @staticmethod
+    def _map_skills(candidate: Candidate) -> list[dict[str, Any]]:
+        """Build the enriched skills list expected by the assignment schema.
+
+        Each skill tag is wrapped with the confidence score and source list
+        derived from the pipeline's per-field confidence and provenance data.
+        """
+        skills_confidence: float | None = None
+        skills_source: str | None = None
+
+        # Prefer provenance as the authoritative source attribution
+        if candidate.provenance and "skills" in candidate.provenance:
+            prov = candidate.provenance["skills"]
+            skills_source = _source_name(prov.source)
+
+        # Confidence score comes from the per-field confidence map
+        if candidate.confidence and "skills" in candidate.confidence.fields:
+            field_conf = candidate.confidence.fields["skills"]
+            skills_confidence = field_conf.score
+            # Fall back to confidence source if provenance was absent
+            if skills_source is None:
+                skills_source = _source_name(field_conf.source)
+
+        return [
+            {
+                "name": skill,
+                "confidence": (
+                    round(skills_confidence, 4)
+                    if skills_confidence is not None
+                    else None
+                ),
+                "sources": [skills_source] if skills_source else [],
+            }
+            for skill in candidate.skills
+        ]
+
+    @staticmethod
+    def _map_provenance(candidate: Candidate) -> list[dict[str, str]]:
+        """Flatten the provenance dict into the list format expected by the schema.
+
+        Internal shape:  ``{field_name: FieldProvenance}``
+        Output shape:    ``[{field, source, method}]``
+        """
+        return [
+            {
+                "field": field_name,
+                "source": _source_name(prov.source),
+                "method": "Extracted",
+            }
+            for field_name, prov in candidate.provenance.items()
+        ]
+
+
+# ---------------------------------------------------------------------------
+# Module-level helpers
+# ---------------------------------------------------------------------------
+
+
+def _parse_location(location_str: str | None) -> dict[str, str]:
+    """Parse a free-text location string into a structured object.
+
+    The internal model stores location as a free-text string, e.g.
+    ``"Dehradun, Uttarakhand, India"``. This function splits on commas and
+    maps the parts to ``city``, ``region``, and ``country``. Missing parts
+    default to an empty string.
 
     Args:
-        data: The dict to navigate.
-        dotted_path: A dot-separated field path, e.g. ``"contact.email"``.
+        location_str: Free-text location or ``None``.
 
     Returns:
-        A ``(found, value)`` tuple. ``found`` is ``False`` if any segment of
-        the path is absent or not a dict.
+        A dict with keys ``city``, ``region``, and ``country``.
     """
-    current: Any = data
-    for segment in dotted_path.split("."):
-        if not isinstance(current, dict) or segment not in current:
-            return False, None
-        current = current[segment]
-    return True, current
+    if not location_str:
+        return {"city": "", "region": "", "country": ""}
+    parts = [p.strip() for p in location_str.split(",")]
+    return {
+        "city": parts[0] if len(parts) > 0 else "",
+        "region": parts[1] if len(parts) > 1 else "",
+        "country": parts[2] if len(parts) > 2 else "",
+    }
+
+
+def _source_name(source: Any) -> str:
+    """Return a clean string name for a ``DataSource`` enum value or string.
+
+    Args:
+        source: A ``DataSource`` enum instance or any object.
+
+    Returns:
+        The ``.name`` attribute when available, otherwise ``str(source)``.
+    """
+    return source.name if hasattr(source, "name") else str(source)

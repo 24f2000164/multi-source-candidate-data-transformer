@@ -1,71 +1,38 @@
-# Assignment projection rules — schema documentation.
+# Assignment projection rules.
 #
-# NOTE: As of Sprint 08 the AssignmentProjection class uses code-driven
-# structural mapping instead of this YAML for field inclusion and renaming.
-# The YAML-only approach could not express the transformations required by
-# the assignment output contract (field combination, list wrapping, nested
-# object decomposition, skills enrichment, provenance flattening).
+# NOTE: AssignmentProjection uses code-driven structural mapping (not this
+# YAML) for the default "assignment" projection. This file is retained for:
+#   - Backward compatibility with tests that pass a custom rules_path
+#   - Documentation of the internal → output field mapping
 #
-# This file is kept for:
-#   - Human-readable documentation of the Internal → Output field mapping.
-#   - Future reference if a new projection type uses the config-driven approach.
-#
-# Assignment output schema (assignment default output contract)
-# ------------------------------------------------------------
-#
-#   Internal Candidate field          Output key / structure
-#   ─────────────────────────────     ──────────────────────────────────────
-#   id (UUID)                     →  candidate_id  (string)
-#   first_name + last_name        →  full_name     (string, concatenated)
-#   contact.email                 →  emails        (list[str])
-#   contact.phone                 →  phones        (list[str])
-#   contact.location (free-text)  →  location      {city, region, country}
-#   contact.linkedin_url          →  links.linkedin
-#   contact.github_url            →  links.github
-#   —                             →  headline      (null, reserved)
-#   —                             →  years_experience (null, reserved)
-#   skills (list[str])            →  skills        [{name, confidence, sources}]
-#   experiences (list)            →  experience    (list, renamed)
-#   education (list)              →  education     (list)
-#   provenance (dict)             →  provenance    [{field, source, method}]
-#   confidence.score              →  overall_confidence (float)
+# The code-driven mapper handles transformations this YAML cannot express:
+# field combination (first_name + last_name → full_name), list wrapping,
+# structured location parsing, skills enrichment, and provenance flattening.
 
 version: "1.0"
 
-# Kept for documentation only — not read by AssignmentProjection.
 fields:
   id:
     output: candidate_id
-    note: "UUID serialised as string"
   first_name:
-    output: full_name
-    note: "Combined with last_name in code"
+    output: first_name
   last_name:
-    output: full_name
-    note: "Combined with first_name in code"
+    output: last_name
+  external_id:
+    output: externalId
   contact.email:
-    output: emails
-    note: "Wrapped in a list"
+    output: email
   contact.phone:
-    output: phones
-    note: "Wrapped in a list"
+    output: phoneNumber
   contact.location:
     output: location
-    note: "Free-text string parsed into {city, region, country}"
-  contact.linkedin_url:
-    output: links.linkedin
-  contact.github_url:
-    output: links.github
   experiences:
     output: experience
-    note: "Field renamed; full object list preserved"
   education:
     output: education
   skills:
     output: skills
-    note: "list[str] enriched to [{name, confidence, sources}]"
-  provenance:
-    output: provenance
-    note: "dict[field, FieldProvenance] flattened to [{field, source, method}]"
-  confidence.score:
-    output: overall_confidence
+  certifications:
+    output: certifications
+  languages:
+    output: languages
