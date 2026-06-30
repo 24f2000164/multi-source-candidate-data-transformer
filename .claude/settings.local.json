@@ -3,7 +3,8 @@
     "allow": [
       "Bash(python:*)",
       "Bash(mkdir:*)",
-      "Bash(touch:*)"
+      "Bash(touch:*)",
+      "Bash(pip install:*)"
     ]
   }
 }
