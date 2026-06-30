@@ -1,81 +1,113 @@
-"""``AssignmentProjection``: maps a ``Candidate`` to the assignment JSON schema.
-
-The YAML-driven field-rename approach used in the previous implementation
-cannot express the structural transformations required by the assignment
-output contract (list wrapping, object decomposition, field combination,
-provenance flattening, skills enrichment). This module replaces that
-approach with explicit mapping logic while preserving the same public
-interface so the CLI composition root requires no changes.
-
-Mapping summary
----------------
-Internal field                   → Assignment output key
---------------------------------   --------------------------
-id                               → candidate_id
-first_name + last_name           → full_name
-contact.email                    → emails[]
-contact.phone                    → phones[]
-contact.location (free-text)     → location {city, region, country}
-contact.linkedin_url             → links.linkedin
-contact.github_url               → links.github
-experiences                      → experience
-confidence.score                 → overall_confidence
-skills (list[str])               → skills [{name, confidence, sources}]
-provenance (dict)                → provenance [{field, source, method}]
-"""
-
 from pathlib import Path
 from typing import Any
 
+from transformer.config.config_loader import Config, ConfigLoader
+from transformer.config.loader import DEFAULT_CONFIG_DIR
 from transformer.models import Candidate
+from transformer.projection.exceptions import ProjectionError
 from transformer.projection.projection_strategy import ProjectionStrategy
+
+_DEFAULT_RULES_PATH = DEFAULT_CONFIG_DIR / "projection_rules.yaml"
 
 
 class AssignmentProjection(ProjectionStrategy):
     """Projects a ``Candidate`` into the assignment-required JSON output schema.
 
-    Transforms the rich internal domain model into the flat canonical schema
-    expected by the assignment evaluator. The internal ``Candidate`` model is
-    never modified; only the serialised output representation changes.
-
-    The constructor accepts (and silently ignores) the legacy ``config_loader``
-    and ``rules_path`` keyword arguments so that the existing CLI composition
-    root (``cli/app.py``) continues to work without modification.
+    When instantiated without a ``rules_path`` the projection uses a
+    code-driven mapper that produces the full assignment output contract.
+    When a custom ``rules_path`` is supplied the original YAML-driven
+    field-rename behaviour is preserved for backward compatibility.
     """
 
     def __init__(
         self,
         *,
-        rules_path: Path | None = None,  # accepted for backward-compat, unused
-        config_loader: Any = None,  # accepted for backward-compat, unused
+        rules_path: Path | None = None,
+        config_loader: ConfigLoader | None = None,
     ) -> None:
-        """Initialise the projection strategy.
+        """Initialise the strategy.
 
         Args:
-            rules_path: Ignored. Retained for backward compatibility.
-            config_loader: Ignored. Retained for backward compatibility.
+            rules_path: Path to a custom ``projection_rules.yaml``.  When
+                supplied the YAML-driven field-rename mode is activated.
+                Omit (or pass ``None``) to use the full code-driven assignment
+                schema mapper.
+            config_loader: Loader used in YAML-driven mode.  A private loader
+                is created if omitted.
+
+        Raises:
+            ProjectionError: In YAML-driven mode, if the rules file is missing,
+                invalid, or does not declare a ``fields`` mapping.
         """
+        self._yaml_rules: dict[str, str] | None = None
+
+        if rules_path is not None:
+            # Custom rules_path supplied -> YAML-driven mode
+            loader = config_loader or ConfigLoader()
+            config: Config = loader.load(rules_path)
+            fields = config.section("fields")
+            if not isinstance(fields, dict) or not fields:
+                raise ProjectionError(
+                    f"projection rules file must declare a non-empty 'fields' "
+                    f"mapping: {rules_path}"
+                )
+            rules: dict[str, str] = {}
+            for field_path, rule in fields.items():
+                if not isinstance(rule, dict) or "output" not in rule:
+                    raise ProjectionError(
+                        f"projection rule for {field_path!r} must declare an "
+                        f"'output' key: {rules_path}"
+                    )
+                rules[field_path] = rule["output"]
+            self._yaml_rules = rules
 
     # ------------------------------------------------------------------
     # Public interface
     # ------------------------------------------------------------------
 
     def project(self, candidate: Candidate) -> dict[str, Any]:
-        """Map a ``Candidate`` to the assignment output schema.
+        """Project a candidate into the configured output schema.
 
         Args:
             candidate: The canonical candidate record produced by the pipeline.
 
         Returns:
-            A JSON-safe ``dict`` matching the assignment default output schema.
+            A JSON-safe ``dict``.  Shape depends on the mode:
+            - YAML-driven mode: only the configured fields, renamed.
+            - Code-driven mode: the full assignment output contract.
         """
+        if self._yaml_rules is not None:
+            return self._project_yaml(candidate)
+        return self._project_assignment(candidate)
+
+    # ------------------------------------------------------------------
+    # YAML-driven mode (custom rules_path)
+    # ------------------------------------------------------------------
+
+    def _project_yaml(self, candidate: Candidate) -> dict[str, Any]:
+        """Original field-include-and-rename projection driven by YAML rules."""
+        assert self._yaml_rules is not None
+        source = candidate.model_dump(mode="json")
+        output: dict[str, Any] = {}
+        for field_path, output_key in self._yaml_rules.items():
+            found, value = _resolve_path(source, field_path)
+            if found and value is not None:
+                output[output_key] = value
+        return output
+
+    # ------------------------------------------------------------------
+    # Code-driven mode (default assignment schema)
+    # ------------------------------------------------------------------
+
+    def _project_assignment(self, candidate: Candidate) -> dict[str, Any]:
+        """Full structural mapping to the assignment output contract."""
         output: dict[str, Any] = {}
 
-        # ── Identity ──────────────────────────────────────────────────────────
+        # Identity
         output["candidate_id"] = str(candidate.id)
         output["full_name"] = f"{candidate.first_name} {candidate.last_name}".strip()
 
-        # ── Contact ───────────────────────────────────────────────────────────
+        # Contact
         contact = candidate.contact
         output["emails"] = [contact.email] if (contact and contact.email) else []
         output["phones"] = [contact.phone] if (contact and contact.phone) else []
@@ -89,25 +121,22 @@ class AssignmentProjection(ProjectionStrategy):
             ),
         }
 
-        # ── Profile metadata (reserved for future enrichment) ─────────────────
+        # Profile metadata (reserved for future enrichment)
         output["headline"] = None
         output["years_experience"] = None
 
-        # ── Skills with confidence + sources ─────────────────────────────────
-        # The internal model stores per-field (not per-skill-item) confidence.
-        # We resolve a single confidence score + source for the "skills" field
-        # and apply it uniformly across every skill tag.
+        # Skills enriched with confidence + sources
         output["skills"] = self._map_skills(candidate)
 
-        # ── Experience & Education ────────────────────────────────────────────
+        # Experience & Education
         raw = candidate.model_dump(mode="json")
         output["experience"] = raw.get("experiences", [])
         output["education"] = raw.get("education", [])
 
-        # ── Provenance  dict[field, FieldProvenance] → list[{field, source, method}]
+        # Provenance: dict -> list
         output["provenance"] = self._map_provenance(candidate)
 
-        # ── Overall confidence ────────────────────────────────────────────────
+        # Overall confidence
         output["overall_confidence"] = (
             candidate.confidence.score if candidate.confidence else None
         )
@@ -120,24 +149,17 @@ class AssignmentProjection(ProjectionStrategy):
 
     @staticmethod
     def _map_skills(candidate: Candidate) -> list[dict[str, Any]]:
-        """Build the enriched skills list expected by the assignment schema.
-
-        Each skill tag is wrapped with the confidence score and source list
-        derived from the pipeline's per-field confidence and provenance data.
-        """
+        """Build the enriched skills list expected by the assignment schema."""
         skills_confidence: float | None = None
         skills_source: str | None = None
 
-        # Prefer provenance as the authoritative source attribution
         if candidate.provenance and "skills" in candidate.provenance:
             prov = candidate.provenance["skills"]
             skills_source = _source_name(prov.source)
 
-        # Confidence score comes from the per-field confidence map
         if candidate.confidence and "skills" in candidate.confidence.fields:
             field_conf = candidate.confidence.fields["skills"]
             skills_confidence = field_conf.score
-            # Fall back to confidence source if provenance was absent
             if skills_source is None:
                 skills_source = _source_name(field_conf.source)
 
@@ -156,11 +178,7 @@ class AssignmentProjection(ProjectionStrategy):
 
     @staticmethod
     def _map_provenance(candidate: Candidate) -> list[dict[str, str]]:
-        """Flatten the provenance dict into the list format expected by the schema.
-
-        Internal shape:  ``{field_name: FieldProvenance}``
-        Output shape:    ``[{field, source, method}]``
-        """
+        """Flatten provenance dict to list format expected by the schema."""
         return [
             {
                 "field": field_name,
@@ -177,19 +195,7 @@ class AssignmentProjection(ProjectionStrategy):
 
 
 def _parse_location(location_str: str | None) -> dict[str, str]:
-    """Parse a free-text location string into a structured object.
-
-    The internal model stores location as a free-text string, e.g.
-    ``"Dehradun, Uttarakhand, India"``. This function splits on commas and
-    maps the parts to ``city``, ``region``, and ``country``. Missing parts
-    default to an empty string.
-
-    Args:
-        location_str: Free-text location or ``None``.
-
-    Returns:
-        A dict with keys ``city``, ``region``, and ``country``.
-    """
+    """Parse a free-text location string into {city, region, country}."""
     if not location_str:
         return {"city": "", "region": "", "country": ""}
     parts = [p.strip() for p in location_str.split(",")]
@@ -200,13 +206,16 @@ def _parse_location(location_str: str | None) -> dict[str, str]:
     }
 
 
+def _resolve_path(data: dict[str, Any], dotted_path: str) -> tuple[bool, Any]:
+    """Resolve a dot-separated path against a nested dict."""
+    current: Any = data
+    for segment in dotted_path.split("."):
+        if not isinstance(current, dict) or segment not in current:
+            return False, None
+        current = current[segment]
+    return True, current
+
+
 def _source_name(source: Any) -> str:
-    """Return a clean string name for a ``DataSource`` enum value or string.
-
-    Args:
-        source: A ``DataSource`` enum instance or any object.
-
-    Returns:
-        The ``.name`` attribute when available, otherwise ``str(source)``.
-    """
+    """Return a clean string name for a DataSource enum or string."""
     return source.name if hasattr(source, "name") else str(source)
