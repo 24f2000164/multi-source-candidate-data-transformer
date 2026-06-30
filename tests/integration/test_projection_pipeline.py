@@ -42,7 +42,7 @@ class TestProjectionPipeline:
         output, report = engine.project(candidate, "assignment")
 
         assert json.loads(json.dumps(output))
-        assert output["firstName"] == "Jane"
+        assert output["full_name"] == "Jane Doe"
         assert report.projection_type == "assignment"
 
     def test_unknown_projection_type(self) -> None:
