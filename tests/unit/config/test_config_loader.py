@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+from pydantic import ValidationError
 import pytest
 
 from transformer.config.config_loader import ConfigLoader
@@ -75,5 +76,5 @@ def test_version_mismatch_raises(tmp_path: Path) -> None:
 def test_config_object_is_immutable(tmp_path: Path) -> None:
     path = _write(tmp_path, "ok.yaml", "version: '1.0'\nfoo: bar\n")
     config = ConfigLoader().load(path)
-    with pytest.raises(Exception):
-        config.version = "2.0"  # type: ignore[misc]
+    with pytest.raises(ValidationError):
+        config.version = "2.0"

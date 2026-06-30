@@ -173,7 +173,9 @@ class StringLengthRule:
             ("last_name", candidate.last_name),
         ]
         for i, exp in enumerate(candidate.experiences):
-            candidates_to_check.append((f"experiences[{i}].description", exp.description))
+            candidates_to_check.append(
+                (f"experiences[{i}].description", exp.description)
+                )
         for field, value in candidates_to_check:
             if value is not None and len(value) > self._max_length:
                 issues.append(
@@ -196,7 +198,7 @@ class UnicodeConfusableRule:
 
     Heuristic: a name field is flagged if it mixes Latin letters with
     characters from other scripts known to contain visually-confusable
-    homoglyphs (e.g. Cyrillic 'а' vs Latin 'a'), which can be used to spoof
+    homoglyphs (e.g. Cyrillic U+0430 vs Latin 'a'), which can be used to spoof
     a different identity.
     """
 

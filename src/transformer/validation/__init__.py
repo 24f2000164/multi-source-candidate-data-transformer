@@ -6,7 +6,10 @@ Example::
 """
 
 from transformer.validation.default_registry import build_default_registry
-from transformer.validation.exceptions import DuplicateRuleNameError, ValidationEngineError
+from transformer.validation.exceptions import (
+    DuplicateRuleNameError,
+    ValidationEngineError,
+)
 from transformer.validation.report import ValidationReport
 from transformer.validation.rule import Severity, ValidationIssue, ValidationRule
 from transformer.validation.rule_registry import RuleRegistry

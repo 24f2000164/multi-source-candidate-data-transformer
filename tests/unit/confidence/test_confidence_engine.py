@@ -2,12 +2,11 @@
 
 import pytest
 
+from tests.unit.confidence._builders import make_candidate
 from transformer.confidence.confidence_engine import ConfidenceEngine, build_strategies
 from transformer.confidence.exceptions import ConfidenceError
 from transformer.confidence.merge_metadata import from_single_source
 from transformer.models import DataSource
-
-from tests.unit.confidence._builders import make_candidate
 
 
 def test_build_strategies_unknown_name_raises() -> None:

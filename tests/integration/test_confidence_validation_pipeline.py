@@ -10,14 +10,14 @@ from pathlib import Path
 
 import pytest
 
-from transformer.config.config_loader import ConfigLoader
-from transformer.config.exceptions import ConfigError
 from transformer.confidence.confidence_engine import ConfidenceEngine, build_strategies
 from transformer.confidence.merge_metadata import (
     StaticMergeMetadata,
     _FieldMergeView,
     from_single_source,
 )
+from transformer.config.config_loader import ConfigLoader
+from transformer.config.exceptions import ConfigError
 from transformer.models import Candidate, ContactInfo, DataSource, WorkExperience
 from transformer.validation.default_registry import build_default_registry
 from transformer.validation.rule_registry import RuleRegistry

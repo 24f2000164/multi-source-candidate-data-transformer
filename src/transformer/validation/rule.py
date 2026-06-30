@@ -1,9 +1,9 @@
 """Core validation contracts: ``ValidationRule``, ``Severity``, ``ValidationIssue``."""
 
 from enum import StrEnum
-from typing import Any, Protocol, runtime_checkable
+from typing import Protocol, runtime_checkable
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict
 
 from transformer.models import Candidate
 

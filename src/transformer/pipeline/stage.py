@@ -30,7 +30,8 @@ class PipelineStage(Protocol):
 
     name: str
 
-    def run(self, candidate: Candidate, metadata: MergeMetadata) -> tuple[Candidate, object]:
+    def run(self, candidate: Candidate, metadata: MergeMetadata
+    ) -> tuple[Candidate, object]:
         """Run this stage.
 
         Args:
@@ -51,7 +52,8 @@ class ConfidenceStage:
     engine: ConfidenceEngine
     name: str = "confidence"
 
-    def run(self, candidate: Candidate, metadata: MergeMetadata) -> tuple[Candidate, object]:
+    def run(self, candidate: Candidate, metadata: MergeMetadata
+            ) -> tuple[Candidate, object]:
         """Run confidence scoring.
 
         Args:
@@ -71,7 +73,8 @@ class ValidationStage:
     engine: ValidationEngine
     name: str = "validation"
 
-    def run(self, candidate: Candidate, metadata: MergeMetadata) -> tuple[Candidate, object]:
+    def run(self, candidate: Candidate, metadata: MergeMetadata
+            ) -> tuple[Candidate, object]:
         """Run validation.
 
         Args:

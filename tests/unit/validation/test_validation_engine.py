@@ -1,10 +1,9 @@
 """Unit tests for transformer.validation.validation_engine.ValidationEngine."""
 
+from tests.unit.validation._builders import make_candidate
 from transformer.validation.rule import Severity, ValidationIssue
 from transformer.validation.rule_registry import RuleRegistry
 from transformer.validation.validation_engine import ValidationEngine
-
-from tests.unit.validation._builders import make_candidate
 
 
 class _PassingRule:

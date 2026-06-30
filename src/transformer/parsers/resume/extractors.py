@@ -74,6 +74,33 @@ def extract_phone(text: str) -> str | None:
     return None
 
 
+
+def extract_date_span(text: str) -> tuple[int, int, str, str] | None:
+    """Find the first date-range match in ``text`` and return its span.
+ 
+    Unlike ``extract_dates``, this also returns the character offsets of
+    the match so a caller can remove the date substring from a line that
+    mixes a date with other text (e.g. ``"Title, Company — Jan 2022 -
+    Present"``).
+ 
+    Args:
+        text: Plain text to search.
+ 
+    Returns:
+        A ``(start, end, start_date, end_date)`` tuple for the first
+        match, or ``None`` if no date range is found.
+    """
+    match = _DATE_RANGE_RE.search(text)
+    if match is None:
+        return None
+    return (
+        match.start(),
+        match.end(),
+        match.group("start").strip(),
+        match.group("end").strip(),
+    )
+
+
 def extract_linkedin_url(text: str) -> str | None:
     """Find the first LinkedIn profile URL in ``text``.
 

@@ -2,13 +2,12 @@
 
 from datetime import date
 
+from tests.unit.validation._builders import make_candidate, make_experience
 from transformer.models import OverallConfidence
 from transformer.validation.rules.cross_field_rules import (
     ConfidenceFieldConsistencyRule,
     DateOrderRule,
 )
-
-from tests.unit.validation._builders import make_candidate, make_experience
 
 
 def test_date_order_rule_passes_for_ordered_dates() -> None:

@@ -1,5 +1,6 @@
 """Unit tests for transformer.validation.rules.schema_rules."""
 
+from tests.unit.validation._builders import make_candidate
 from transformer.models import OverallConfidence
 from transformer.validation.rule import Severity
 from transformer.validation.rules.schema_rules import (
@@ -10,8 +11,6 @@ from transformer.validation.rules.schema_rules import (
     StringLengthRule,
     UnicodeConfusableRule,
 )
-
-from tests.unit.validation._builders import make_candidate
 
 
 def test_required_fields_pass_for_valid_candidate() -> None:
@@ -67,7 +66,7 @@ def test_unicode_confusable_rule_passes_for_plain_latin_name() -> None:
 
 
 def test_unicode_confusable_rule_flags_mixed_script_name() -> None:
-    # 'а' (U+0430 CYRILLIC SMALL LETTER A) mixed with Latin letters.
+   # 'а' (U+0430 CYRILLIC SMALL LETTER A) mixed with Latin letters.  # noqa: RUF003
     spoofed_name = "M\u0430ria"
     candidate = make_candidate(first_name=spoofed_name)
     issues = UnicodeConfusableRule().check(candidate)

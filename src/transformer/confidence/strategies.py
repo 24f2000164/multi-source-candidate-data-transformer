@@ -9,8 +9,8 @@ strategy ordering a pure aggregation concern (documented in
 ``config/confidence_rules.yaml``) rather than an implicit code dependency.
 """
 
-import math
 from dataclasses import dataclass
+import math
 from typing import Protocol, runtime_checkable
 
 from transformer.confidence.merge_metadata import MergeMetadata

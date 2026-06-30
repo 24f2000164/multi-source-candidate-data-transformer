@@ -22,6 +22,46 @@ _MIN_NAME_WORDS = 2
 _SCAN_LINE_LIMIT = 5
 _NAME_WORD_RE = re.compile(r"^[^\W\d_][^\W\d_'\-]*$", re.UNICODE)
 
+# Section headers and school/board labels that must never be mistaken for a
+# candidate name, even when they happen to be 2-4 capitalised words (e.g.
+# "Class XII", "Higher Secondary"). Checked in addition to
+# ``SectionDetector.is_header_alias`` (which only covers the canonical
+# section names), since school-label lines like "Class XII" or "CBSE" are
+# not section headers at all -- they are body content that a naive
+# word-count/capitalisation heuristic would otherwise accept as a name.
+_NAME_DENYLIST = frozenset(
+    {
+        "education",
+        "experience",
+        "projects",
+        "skills",
+        "summary",
+        "certifications",
+        "languages",
+        "achievements",
+        "class x",
+        "class xii",
+        "cbse",
+        "icse",
+        "higher secondary",
+        "secondary",
+    }
+)
+
+
+def _is_denylisted(line: str) -> bool:
+    """Check whether ``line`` is a known section header or school label.
+
+    Args:
+        line: Candidate line of text.
+
+    Returns:
+        ``True`` if the lower-cased, whitespace-collapsed line exactly
+        matches a denylisted term.
+    """
+    normalized = " ".join(line.lower().split())
+    return normalized in _NAME_DENYLIST
+
 
 class NameDetector:
     """Detects a candidate's first and last name from extracted resume text."""
@@ -100,5 +140,7 @@ class NameDetector:
         if not all(_NAME_WORD_RE.match(w) for w in words):
             return None
         if not all(w[0].isupper() for w in words):
+            return None
+        if _is_denylisted(line):
             return None
         return words[0], " ".join(words[1:])

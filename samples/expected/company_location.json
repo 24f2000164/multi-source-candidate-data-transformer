@@ -1,0 +1,12 @@
+{
+  "experiences": [
+    {
+      "company": "Microsoft",
+      "title": "Senior Software Engineer",
+      "start_date": "2021-08-01",
+      "end_date": null,
+      "description": "Worked on Azure services.",
+      "skills": []
+    }
+  ]
+}

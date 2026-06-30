@@ -1,5 +1,6 @@
 """Unit tests for transformer.confidence.aggregator.ConfidenceAggregator."""
 
+from tests.unit.confidence._builders import make_candidate
 from transformer.confidence.aggregator import ConfidenceAggregator
 from transformer.confidence.merge_metadata import from_single_source
 from transformer.confidence.strategies import (
@@ -9,8 +10,6 @@ from transformer.confidence.strategies import (
     SourceWeightStrategy,
 )
 from transformer.models import DataSource
-
-from tests.unit.confidence._builders import make_candidate
 
 _SOURCE_WEIGHTS = {DataSource.ATS: 0.7, DataSource.RESUME: 0.6}
 

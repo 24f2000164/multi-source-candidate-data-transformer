@@ -1,5 +1,6 @@
 """Unit tests for transformer.confidence.strategies."""
 
+from tests.unit.confidence._builders import make_candidate
 from transformer.confidence.merge_metadata import StaticMergeMetadata, _FieldMergeView
 from transformer.confidence.strategies import (
     AgreementStrategy,
@@ -9,8 +10,6 @@ from transformer.confidence.strategies import (
     StrategyContext,
 )
 from transformer.models import DataSource
-
-from tests.unit.confidence._builders import make_candidate
 
 
 def _metadata(**fields: _FieldMergeView) -> StaticMergeMetadata:

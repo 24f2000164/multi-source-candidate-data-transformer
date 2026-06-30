@@ -1,0 +1,42 @@
+# Assignment projection rules.
+#
+# Declares which canonical Candidate fields are included in the
+# "assignment" projection output, and what output key each is renamed to.
+#
+# Format:
+#   fields:
+#     <canonical field path>:
+#       output: <output key name>
+#
+# `<canonical field path>` is a dot-separated path into the candidate's
+# `model_dump(mode="json")` dict (e.g. "contact.email" reaches the email
+# nested under contact). Only field inclusion and renaming are supported --
+# no transform expressions or DSLs.
+
+version: "1.0"
+
+fields:
+  id:
+    output: candidateId
+  first_name:
+    output: firstName
+  last_name:
+    output: lastName
+  external_id:
+    output: externalId
+  contact.email:
+    output: email
+  contact.phone:
+    output: phoneNumber
+  contact.location:
+    output: location
+  experiences:
+    output: experience
+  education:
+    output: education
+  skills:
+    output: skills
+  certifications:
+    output: certifications
+  languages:
+    output: languages

@@ -145,13 +145,14 @@ class ResumeParser(BaseParser):
         skills_text = sections.get(SectionName.SKILLS, "")
         languages_text = sections.get(SectionName.LANGUAGES, "")
         certifications_text = sections.get(SectionName.CERTIFICATIONS, "")
+        header_text = self._extract_header_text(extracted)
 
         return ExtractedResumeData(
             first_name=first_name,
             last_name=last_name,
             email=extractors.extract_email(extracted.plain_text),
             phone=extractors.extract_phone(extracted.plain_text),
-            location=extractors.extract_location(extracted.plain_text),
+            location=extractors.extract_location(header_text),
             linkedin_url=extractors.extract_linkedin_url(extracted.plain_text),
             github_url=extractors.extract_github_url(extracted.plain_text),
             skills=extractors.extract_list_items(skills_text) if skills_text else [],
@@ -166,6 +167,31 @@ class ResumeParser(BaseParser):
             ),
             certifications=self._build_certification_entries(certifications_text),
         )
+
+    @staticmethod
+    def _extract_header_text(extracted: ExtractedText) -> str:
+        """Return only the document text preceding the first section header.
+
+        Location detection must never read from inside a section body
+        (e.g. an Experience entry's "Company   City, Country" line) -- it
+        should only look at the resume's header/contact block. This finds
+        the first line that is a recognised section-header alias and
+        returns everything before it; if no header is found, the whole
+        document is returned (preserves prior behaviour for resumes with
+        no detectable sections at all).
+
+        Args:
+            extracted: Extracted text and block metadata for the resume.
+
+        Returns:
+            The plain text of the document up to (but excluding) the
+            first detected section header line.
+        """
+        lines = extracted.plain_text.splitlines()
+        for index, line in enumerate(lines):
+            if SectionDetector.is_header_alias(line.strip()):
+                return "\n".join(lines[:index])
+        return extracted.plain_text
 
     @staticmethod
     def _build_certification_entries(
@@ -344,13 +370,35 @@ class ResumeParser(BaseParser):
     ) -> list[RawExperienceEntry]:
         """Build raw experience entries from non-pipe, multi-line runs.
 
-        Groups lines into ``(header lines..., date line, bullet
-        lines...)`` runs: the date-range line marks the end of an entry's
-        header block (so the date range is never used as company/title),
-        the first header line(s) become ``company`` and the last header
-        line becomes ``title`` (or both equal a single header line), and
-        subsequent bullet lines become the description. Supports multiple
-        entries per run.
+        Each run is ``(header lines..., date line OR same-line
+        text+date, bullet lines...)``. Three cases for the line(s) that
+        carry the date:
+
+        1. **Same-line mixed text + date** (e.g. ``"Software Engineer,
+           Google — Jan 2022 – Present"``): the date substring is located
+           and stripped out of the line first (rather than assuming a
+           date always occupies its own line), and the remaining text is
+           classified into title/company via
+           ``_split_title_company_segment``.
+        2. **Pure date-only line** preceded by header line(s): the date
+           line itself contributes nothing to company/title; the
+           preceding header line(s) are classified the same way a
+           same-line match would be -- a single header line is checked
+           for an embedded separator (comma/dash/pipe) via
+           ``_split_title_company_segment``; if no separator is present
+           and the line is therefore ambiguous (Bug: a lone ``"Software
+           Engineer"`` header can not be deterministically split into a
+           distinct company and title), the entry is skipped rather than
+           hallucinating ``company = title`` from the same string.
+        3. **Multiple header lines**: first line(s) are ``company``, last
+           line is ``title`` (unchanged prior behaviour) -- this case is
+           unambiguous since two physically distinct lines are already
+           given.
+
+        A trailing ``City, Region``-shaped fragment is stripped from a
+        company candidate before it is used, so it is never blended into
+        ``company``/``title`` (location is contact-level data, not
+        company metadata).
 
         Args:
             lines: Stripped, non-empty lines that were not routed to the
@@ -358,35 +406,51 @@ class ResumeParser(BaseParser):
 
         Returns:
             List of raw experience entries; empty if no dates found.
+            Entries whose company/title cannot be deterministically
+            recovered are omitted rather than guessed.
         """
         entries: list[RawExperienceEntry] = []
         i, n = 0, len(lines)
         while i < n:
             header_lines: list[str] = []
-            while i < n and not extractors.extract_dates(lines[i]):
-                if cls._is_bullet(lines[i]):
+            same_line_date: tuple[str, str] | None = None
+            same_line_remainder: str | None = None
+
+            while i < n:
+                line = lines[i]
+                if cls._is_bullet(line):
                     i += 1
                     continue
-                header_lines.append(lines[i])
+                span = extractors.extract_date_span(line)
+                if span is not None:
+                    start_off, end_off, start, end = span
+                    remainder = (line[:start_off] + line[end_off:]).strip(" ,-—–|")
+                    same_line_date = (start, end)
+                    same_line_remainder = remainder or None
+                    i += 1
+                    break
+                header_lines.append(line)
                 i += 1
-            if i >= n:
+
+            if same_line_date is None:
+                # No date found before running out of lines in this run;
+                # nothing left to build an entry from.
                 break
-            dates = extractors.extract_dates(lines[i])
-            start, end = dates[0]
-            i += 1
+
+            start, end = same_line_date
 
             desc_lines: list[str] = []
             while i < n and cls._is_bullet(lines[i]):
                 desc_lines.append(cls._strip_bullet(lines[i]))
                 i += 1
 
-            if not header_lines:
-                company = title = None
-            elif len(header_lines) == 1:
-                company = title = header_lines[0]
-            else:
-                company = " ".join(header_lines[:-1])
-                title = header_lines[-1]
+            company, title = cls._resolve_company_title(
+                header_lines, same_line_remainder
+            )
+            if company is None or title is None:
+                # Bug #4: never hallucinate company == title from a single
+                # ambiguous header line -- skip rather than guess.
+                continue
 
             entries.append(
                 RawExperienceEntry(
@@ -398,6 +462,122 @@ class ResumeParser(BaseParser):
                 )
             )
         return entries
+
+    _TITLE_COMPANY_SEPARATORS = (",", "\u2014", "\u2013", "-", "|")
+
+    @classmethod
+    def _split_title_company_segment(cls, segment: str) -> tuple[str, str] | None:
+        """Split a single ``"Title, Company"``-shaped segment.
+
+        Supports ``Title, Company``, ``Title - Company``, ``Title |
+        Company``, and em/en-dash variants. The first recognised
+        separator found determines the split point.
+
+        Args:
+            segment: A single line/remainder believed to contain both a
+                job title and a company name, with any date substring
+                already removed.
+
+        Returns:
+            A ``(company, title)`` tuple, or ``None`` if no recognised
+            separator is present (the segment is ambiguous and must not
+            be guessed at).
+        """
+        for sep in cls._TITLE_COMPANY_SEPARATORS:
+            if sep in segment:
+                left, _, right = segment.partition(sep)
+                left, right = left.strip(), right.strip()
+                if left and right:
+                    return right, left
+        return None
+
+    @classmethod
+    def _resolve_company_title(
+        cls,
+        header_lines: list[str],
+        same_line_remainder: str | None,
+    ) -> tuple[str | None, str | None]:
+        """Resolve ``(company, title)`` from the header lines of one entry.
+
+        Args:
+            header_lines: Zero or more lines preceding the date line/
+                same-line date match.
+            same_line_remainder: The non-date text remaining on the same
+                line as the matched date, if the date was found embedded
+                in a line with other text; ``None`` if the date occupied
+                its own line.
+
+        Returns:
+            A ``(company, title)`` tuple. Either element may be ``None``
+            if no deterministic split could be found -- callers must
+            treat a ``None`` result as "skip this entry", never as
+            license to fall back to duplicating a single string into
+            both fields.
+        """
+        if same_line_remainder is not None:
+            cleaned_remainder = cls._strip_trailing_location(same_line_remainder)
+            split = cls._split_title_company_segment(cleaned_remainder)
+            if split is not None:
+                return split
+            if header_lines:
+                # The date-bearing line's remainder (e.g. "Senior
+                # Software Engineer") has no embedded separator, but a
+                # distinct preceding header line already exists -- the
+                # two physically separate lines unambiguously give
+                # company (header line(s)) and title (remainder), the
+                # same way the multi-header-line case works below.
+                company = cls._strip_trailing_location(" ".join(header_lines))
+                return (company or None), (cleaned_remainder or None)
+            # A bare date with no separator-bearing remainder and no
+            # preceding header lines at all -- nothing to recover.
+            return None, None
+
+        if not header_lines:
+            return None, None
+
+        if len(header_lines) == 1:
+            cleaned_line = cls._strip_trailing_location(header_lines[0])
+            split = cls._split_title_company_segment(cleaned_line)
+            if split is not None:
+                return split
+            # A single, separator-less header line (e.g. just "Software
+            # Engineer", or "Microsoft" after its trailing location was
+            # stripped) cannot be deterministically split into a distinct
+            # company and title -- Bug #4: do not duplicate it into both
+            # fields.
+            return None, None
+
+        company = cls._strip_trailing_location(" ".join(header_lines[:-1]))
+        title = header_lines[-1]
+        return company, title
+
+    _TRAILING_LOCATION_RE = re.compile(
+        r"\s{2,}[A-Z][A-Za-z.\s]+,\s*[A-Za-z.\s]+$"
+    )
+
+    @classmethod
+    def _strip_trailing_location(cls, company: str) -> str:
+        """Strip a trailing ``City, Region``-shaped fragment from a company
+        candidate.
+
+        Resumes commonly lay out ``"Company                City, Country"``
+        on one line, separated by multiple spaces/a tab. That trailing
+        fragment is location metadata, not part of the company name, and
+        must never be blended into ``company`` or leak into
+        ``contact.location`` via the experience section.
+
+        Args:
+            company: A candidate company string, possibly with a trailing
+                location fragment.
+
+        Returns:
+            ``company`` with any trailing ``"  City, Region"``-shaped
+            fragment removed; unchanged if no such fragment is found.
+        """
+        match = cls._TRAILING_LOCATION_RE.search(company)
+        if match is None:
+            return company.strip()
+        return company[: match.start()].strip()
 
     _DEGREE_KEYWORDS = (
         "bachelor",

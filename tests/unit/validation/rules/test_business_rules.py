@@ -1,13 +1,12 @@
 """Unit tests for transformer.validation.rules.business_rules."""
 
+from tests.unit.validation._builders import make_candidate
 from transformer.models import ContactInfo
 from transformer.validation.rules.business_rules import (
     ExternalIdRule,
     PhoneFormatRule,
     UrlFormatRule,
 )
-
-from tests.unit.validation._builders import make_candidate
 
 
 def test_phone_format_passes_for_valid_number() -> None:

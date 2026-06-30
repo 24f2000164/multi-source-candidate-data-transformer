@@ -1,11 +1,14 @@
 """Unit tests for transformer.validation.rules.duplicate_rules."""
 
+from tests.unit.validation._builders import (
+    make_candidate,
+    make_education,
+    make_experience,
+)
 from transformer.validation.rules.duplicate_rules import (
     DuplicateEducationRule,
     DuplicateExperienceRule,
 )
-
-from tests.unit.validation._builders import make_candidate, make_education, make_experience
 
 
 def test_duplicate_experience_rule_passes_for_distinct_entries() -> None:
