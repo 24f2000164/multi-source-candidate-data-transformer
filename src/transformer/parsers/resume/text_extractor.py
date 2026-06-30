@@ -156,6 +156,31 @@ class TextExtractor:
             page_count=page_count,
         )
 
+    @staticmethod
+    def _is_bulleted_paragraph(para: object) -> bool:
+        """Check whether a DOCX paragraph is list/bullet-formatted.
+
+        Word stores bullet/numbered-list formatting in paragraph
+        properties (``<w:numPr>``, applied either directly or via a
+        ``List*`` paragraph style), never in the run text itself (Bug
+        #12). Without detecting this, bulleted description lines have no
+        textual bullet marker at all and are silently dropped by the
+        downstream line-based bullet heuristic in ``ResumeParser``.
+
+        Args:
+            para: A ``python-docx`` ``Paragraph`` instance.
+
+        Returns:
+            ``True`` if the paragraph has direct numbering applied, or
+            uses a paragraph style whose name starts with ``"List"``
+            (e.g. ``"List Bullet"``, ``"List Number"``).
+        """
+        p_pr = para._p.pPr  # type: ignore[attr-defined]
+        if p_pr is not None and p_pr.numPr is not None:
+            return True
+        style = para.style  # type: ignore[attr-defined]
+        return bool(style is not None and style.name and style.name.startswith("List"))
+
     def _extract_docx(self, source: Path) -> ExtractedText:
         """Extract text from a DOCX: paragraphs, tables, headers, footers.
 
@@ -184,6 +209,8 @@ class TextExtractor:
         for para in document.paragraphs:
             text = para.text.strip()
             if text:
+                if self._is_bulleted_paragraph(para):
+                    text = f"\u2022 {text}"
                 blocks.append(
                     TextBlock(text=text, source="body", order=order, is_isolated=True)
                 )

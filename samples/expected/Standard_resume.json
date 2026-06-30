@@ -1,0 +1,64 @@
+{
+  "first_name": "Sahil",
+  "last_name": "Kumar",
+  "external_id": null,
+  "contact": {
+    "email": "24f2000164@ds.study.iitm.ac.in",
+    "phone": "+91-7668470448",
+    "location": null,
+    "linkedin_url": null,
+    "github_url": null
+  },
+  "experiences": [
+    {
+      "company": "Accenture India",
+      "title": "Software Engineering Intern – AI Applications",
+      "start_date": "2026-05-01",
+      "end_date": null,
+      "description": "Building RAG pipelines using Python, FastAPI, LangChain, vector databases, Amazon Bedrock and Hugging Face. Designing Dockerized microservices with REST APIs. Instrumenting LLM pipelines with observability tooling."
+    }
+  ],
+  "education": [
+    {
+      "institution": "Indian Institute of Technology Madras",
+      "degree": "BS",
+      "field_of_study": "Data Science and Applications",
+      "start_date": "2024-01-01",
+      "end_date": "2028-01-01",
+      "gpa": null
+    },
+    {
+      "institution": "National Institute of Technology Uttarakhand",
+      "degree": "B.Tech",
+      "field_of_study": "Electronics and Communication Engineering",
+      "start_date": "2023-01-01",
+      "end_date": "2027-01-01",
+      "gpa": 8.55
+    }
+  ],
+  "skills": [
+    "Python",
+    "C++",
+    "SQL",
+    "FastAPI",
+    "REST APIs",
+    "Microservices",
+    "Docker",
+    "AWS",
+    "Redis",
+    "Celery",
+    "Git",
+    "Linux",
+    "Machine Learning",
+    "LLMs",
+    "RAG",
+    "LangChain",
+    "ChromaDB",
+    "Hugging Face"
+  ],
+  "certifications": [],
+  "languages": [],
+  "confidence": null,
+  "provenance": {},
+  "schema_version": "1.0"
+}

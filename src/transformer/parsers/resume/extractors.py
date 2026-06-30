@@ -55,6 +55,10 @@ def extract_all_emails(text: str) -> list[str]:
 def extract_phone(text: str) -> str | None:
     """Find the first plausible phone number in ``text``.
 
+    Email local-parts are stripped first so phone-shaped digit runs inside
+    an email address (e.g. ``24f2000164@...``) are never mistaken for a
+    phone number.
+
     Args:
         text: Plain text to search.
 
@@ -62,7 +66,8 @@ def extract_phone(text: str) -> str | None:
         The first matched phone number with at least
         ``_MIN_PHONE_DIGITS`` digits, or ``None`` if no match.
     """
-    for match in _PHONE_RE.finditer(text):
+    text_without_emails = _EMAIL_RE.sub(" ", text)
+    for match in _PHONE_RE.finditer(text_without_emails):
         digits = re.sub(r"\D", "", match.group(0))
         if len(digits) >= _MIN_PHONE_DIGITS:
             return match.group(0).strip()
@@ -101,12 +106,20 @@ def extract_github_url(text: str) -> str | None:
     return _ensure_scheme(match.group(0))
 
 
+_CATEGORY_PREFIX_RE = re.compile(r"^[A-Za-z][A-Za-z &/]{0,40}:\s+")
+
+
 def extract_list_items(section_text: str) -> list[str]:
     """Split a section body into discrete items (skills, languages, etc.).
 
-    Splits on commas, bullets, pipes, semicolons, and newlines; strips
-    whitespace and drops empty entries while preserving order and removing
-    duplicates (case-insensitive).
+    Processes line-by-line: a leading category label (e.g.
+    ``"Languages: "`` in ``"Languages: Python, SQL"``) is stripped first,
+    then each line is split on commas/bullets/pipes/semicolons -- but a
+    comma inside balanced parentheses (e.g. ``"Ensemble Learning
+    (LightGBM)"``) is treated as part of the phrase, not a separator, so
+    multi-word/parenthetical skills stay intact. Strips whitespace and
+    drops empty entries while preserving order and removing duplicates
+    (case-insensitive).
 
     Args:
         section_text: Raw text body of a section (e.g. the Skills section).
@@ -116,22 +129,54 @@ def extract_list_items(section_text: str) -> list[str]:
     """
     seen: set[str] = set()
     result: list[str] = []
-    for raw_item in _LIST_SPLIT_RE.split(section_text):
-        item = raw_item.strip(" \t-\u2022")
-        if not item:
+    for line in section_text.splitlines():
+        line = _CATEGORY_PREFIX_RE.sub("", line.strip())
+        if not line:
             continue
-        key = item.lower()
-        if key in seen:
-            continue
-        seen.add(key)
-        result.append(item)
+        for item in _split_respecting_parens(line):
+            item = item.strip(" \t-\u2022")
+            if not item:
+                continue
+            key = item.lower()
+            if key in seen:
+                continue
+            seen.add(key)
+            result.append(item)
     return result
 
 
+def _split_respecting_parens(line: str) -> list[str]:
+    """Split ``line`` on list separators, ignoring separators inside ``()``.
+
+    Args:
+        line: A single line of text (category prefix already stripped).
+
+    Returns:
+        List of raw (untrimmed) split segments.
+    """
+    parts: list[str] = []
+    buf: list[str] = []
+    depth = 0
+    for char in line:
+        if char == "(":
+            depth += 1
+            buf.append(char)
+        elif char == ")":
+            depth = max(0, depth - 1)
+            buf.append(char)
+        elif depth == 0 and char in ",•\u2022|;":
+            parts.append("".join(buf))
+            buf = []
+        else:
+            buf.append(char)
+    parts.append("".join(buf))
+    return parts
+
+
 _DATE_RANGE_RE = re.compile(
-    r"(?P<start>(?:[A-Za-z]{3,9}\.?\s+\d{4})|(?:\d{1,2}/\d{4})|(?:\d{4}))"
+    r"(?P<start>(?:[A-Za-z]{3,9}\.?[\s\-]+\d{4})|(?:\d{1,2}/\d{4})|(?:\d{4}))"
     r"\s*(?:-|\u2013|\u2014|to)\s*"
-    r"(?P<end>(?:[A-Za-z]{3,9}\.?\s+\d{4})|(?:\d{1,2}/\d{4})|(?:\d{4})|(?:present|current))",
+    r"(?P<end>(?:[A-Za-z]{3,9}\.?[\s\-]+\d{4})|(?:\d{1,2}/\d{4})|(?:\d{4})|(?:present|current))",
     re.IGNORECASE,
 )
 
@@ -170,3 +215,96 @@ def _ensure_scheme(url: str) -> str:
     if url.lower().startswith(("http://", "https://")):
         return url
     return f"https://{url}"
+
+
+_LOCATION_LINE_RE = re.compile(r"^[A-Z][A-Za-z.\s]+,\s*[A-Z][A-Za-z.\s]+$")
+_LOCATION_SEGMENT_RE = re.compile(r"^[A-Z][A-Za-z.\s]+,\s*[A-Za-z.\s]+$")
+_PHONE_LIKE_RE = re.compile(r"\d{3}")
+
+
+def extract_location(text: str) -> str | None:
+    """Find the candidate's location (``"City, Region"``-style) in ``text``.
+
+    Looks at the header lines (first few lines, and ``|``-delimited
+    contact-line segments) for a ``"City, Region"`` shaped fragment that
+    is not an email, phone number, or URL.
+
+    Args:
+        text: Plain text to search (typically the whole resume text).
+
+    Returns:
+        The matched location string, or ``None`` if no match.
+    """
+    candidates: list[str] = []
+    for line in text.splitlines()[:6]:
+        for segment in line.split("|"):
+            segment = segment.strip()
+            candidates.append(segment)
+        candidates.append(line.strip())
+
+    for segment in candidates:
+        if not segment or "@" in segment:
+            continue
+        lowered = segment.lower()
+        if "linkedin" in lowered or "github" in lowered or "http" in lowered:
+            continue
+        if _PHONE_LIKE_RE.search(segment):
+            continue
+        if _LOCATION_SEGMENT_RE.match(segment):
+            return segment
+    return None
+
+
+_PROFICIENCY_RE = re.compile(
+    r"\s*[\(\-\u2013]\s*(?:native|fluent|proficient|intermediate|beginner|"
+    r"basic|advanced|professional|conversational|elementary|full "
+    r"professional|limited working|c1|c2|b1|b2|a1|a2)[\)]?\s*$",
+    re.IGNORECASE,
+)
+
+
+def extract_languages(section_text: str) -> list[str]:
+    """Extract spoken languages, dropping trailing proficiency markers.
+
+    Reuses :func:`extract_list_items` for splitting, then strips a
+    trailing proficiency qualifier such as ``"(Native)"`` or
+    ``"- Fluent"`` from each item (e.g. ``"English (Native)"`` ->
+    ``"English"``).
+
+    Args:
+        section_text: Raw text body of the Languages section.
+
+    Returns:
+        Ordered, deduplicated list of language names without proficiency
+        levels.
+    """
+    items = extract_list_items(section_text)
+    result: list[str] = []
+    seen: set[str] = set()
+    for item in items:
+        cleaned = _PROFICIENCY_RE.sub("", item).strip()
+        if not cleaned:
+            continue
+        key = cleaned.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        result.append(cleaned)
+    return result
+
+
+def extract_certifications(section_text: str) -> list[str]:
+    """Extract certification names from a Certifications section body.
+
+    Splits the section into discrete items the same way
+    :func:`extract_list_items` does (one per line/bullet/comma-separated
+    entry), without further heuristics -- issuer/date parsing is left to
+    callers that need it.
+
+    Args:
+        section_text: Raw text body of the Certifications section.
+
+    Returns:
+        Ordered, deduplicated list of certification name strings.
+    """
+    return extract_list_items(section_text)

@@ -1,0 +1,51 @@
+# Confidence scoring configuration.
+#
+# Drives ConfidenceEngine via ConfigLoader -> Config -> ConfidenceEngine.
+# The engine never reads this file directly.
+#
+# version: schema version of this file (checked by ConfigLoader against
+#   CURRENT_SCHEMA_VERSION / MINIMUM_SUPPORTED_SCHEMA_VERSION).
+#
+# strategy_order: the ordered list of strategy names ConfidenceAggregator
+#   runs for every field. Order is meaningful -- e.g. conflict_penalty runs
+#   after agreement so a conflicted-but-multi-sourced field is not
+#   double-counted. Each strategy only contributes a delta; it must never
+#   depend on another strategy's output (see strategies.py module docstring).
+#
+# source_weights: base starting score per DataSource, read by
+#   SourceWeightStrategy.
+#
+# field_weights: weight of each field in the overall weighted-average score.
+#   Fields not listed use default_field_weight.
+
+version: "1.0"
+minimum_supported_version: "1.0"
+current_version: "1.0"
+
+strategy_order:
+  - source_weight
+  - agreement
+  - conflict_penalty
+  - missing_field
+
+source_weights:
+  ATS: 0.7
+  RESUME: 0.6
+
+default_field_weight: 1.0
+
+field_weights:
+  first_name: 1.0
+  last_name: 1.0
+  contact: 1.5
+  experiences: 2.0
+  education: 1.0
+  skills: 0.5
+
+scored_fields:
+  - first_name
+  - last_name
+  - contact
+  - experiences
+  - education
+  - skills

@@ -8,6 +8,7 @@ LLMs, no machine learning; PyMuPDF/python-docx/regex only.
 
 import logging
 from pathlib import Path
+import re
 
 from transformer.models import Candidate
 from transformer.parsers.base_parser import BaseParser
@@ -17,6 +18,8 @@ from transformer.parsers.parser_config import ParserConfig
 from transformer.parsers.resume import extractors
 from transformer.parsers.resume.extracted_data import (
     ExtractedResumeData,
+    RawCertificationEntry,
+    RawEducationEntry,
     RawExperienceEntry,
 )
 from transformer.parsers.resume.name_detector import NameDetector
@@ -141,37 +144,100 @@ class ResumeParser(BaseParser):
 
         skills_text = sections.get(SectionName.SKILLS, "")
         languages_text = sections.get(SectionName.LANGUAGES, "")
+        certifications_text = sections.get(SectionName.CERTIFICATIONS, "")
 
         return ExtractedResumeData(
             first_name=first_name,
             last_name=last_name,
             email=extractors.extract_email(extracted.plain_text),
             phone=extractors.extract_phone(extracted.plain_text),
+            location=extractors.extract_location(extracted.plain_text),
             linkedin_url=extractors.extract_linkedin_url(extracted.plain_text),
             github_url=extractors.extract_github_url(extracted.plain_text),
             skills=extractors.extract_list_items(skills_text) if skills_text else [],
             languages=(
-                extractors.extract_list_items(languages_text) if languages_text else []
+                extractors.extract_languages(languages_text) if languages_text else []
             ),
             experience_entries=self._build_experience_entries(
                 sections.get(SectionName.EXPERIENCE)
             ),
-            education_entries=[],
-            certifications=[],
+            education_entries=self._build_education_entries(
+                sections.get(SectionName.EDUCATION)
+            ),
+            certifications=self._build_certification_entries(certifications_text),
         )
 
     @staticmethod
+    def _build_certification_entries(
+        section_text: str | None,
+    ) -> list[RawCertificationEntry]:
+        """Build raw certification entries from a section body.
+
+        Args:
+            section_text: Raw body text of the Certifications section, if
+                detected.
+
+        Returns:
+            List of raw certification entries; empty if no section found.
+        """
+        if not section_text:
+            return []
+        return [
+            RawCertificationEntry(name=name)
+            for name in extractors.extract_certifications(section_text)
+        ]
+
+    _BULLET_PREFIXES = ("•", "-", "*", "\u2013", "\u2014")
+
+    @classmethod
+    def _is_bullet(cls, line: str) -> bool:
+        """Check whether ``line`` starts with a bullet marker.
+
+        Args:
+            line: A single stripped line of text.
+
+        Returns:
+            ``True`` if the line begins with a recognised bullet marker.
+        """
+        return line.startswith(cls._BULLET_PREFIXES)
+
+    @classmethod
+    def _strip_bullet(cls, line: str) -> str:
+        """Remove a leading bullet marker and surrounding whitespace.
+
+        Args:
+            line: A single stripped line of text.
+
+        Returns:
+            The line with its leading bullet marker removed.
+        """
+        return line.lstrip("".join(cls._BULLET_PREFIXES)).strip()
+
+    @classmethod
     def _build_experience_entries(
+        cls,
         section_text: str | None,
     ) -> list[RawExperienceEntry]:
-        """Build best-effort raw experience entries from a section body.
+        """Build raw experience entries from a section body.
 
-        One entry per non-empty line containing a detected date range; the
-        line is used as both a free-text description and the source of the
-        date range. Known limitation: company/title are not separately
-        disambiguated from a single text line without further structural
-        signal (documented, not silently broken -- see Sprint 03 plan
-        Section 8).
+        Two independent, non-interacting code paths (Bug #15: heuristics
+        from one flow are never reused by the other, to avoid e.g. the
+        newline-flow's location-comma heuristic misfiring on pipe
+        segments):
+
+        1. **Pipe-delimited single-line flow**: a line containing ``|``
+           (e.g. ``"Acme Corp | Engineer | Jan 2022 - Present"``) is split
+           on ``|`` and each segment is classified independently as a
+           date-range, else treated as company/title in encounter order.
+           Bullet lines immediately following the pipe-line become that
+           entry's description.
+        2. **Newline multi-line flow** (unchanged from the original
+           design): groups ``(header lines..., date line, bullet
+           lines...)`` runs across multiple lines.
+
+        A line is routed to the pipe flow if and only if it contains
+        ``|`` AND a date range is found among its pipe-segments; this
+        keeps an accidental ``|`` in unrelated text from being misrouted.
 
         Args:
             section_text: Raw body text of the Experience section, if
@@ -183,22 +249,420 @@ class ResumeParser(BaseParser):
         """
         if not section_text:
             return []
+        lines = [ln.strip() for ln in section_text.splitlines() if ln.strip()]
+
         entries: list[RawExperienceEntry] = []
-        for line in section_text.splitlines():
-            line = line.strip()
-            if not line:
-                continue
-            dates = extractors.extract_dates(line)
-            if not dates:
-                continue
+        pending_newline_lines: list[str] = []
+
+        def flush_newline_lines() -> None:
+            if pending_newline_lines:
+                entries.extend(
+                    cls._build_experience_entries_newline_flow(pending_newline_lines)
+                )
+                pending_newline_lines.clear()
+
+        i, n = 0, len(lines)
+        while i < n:
+            line = lines[i]
+            pipe_entry = cls._try_build_pipe_experience_entry(line)
+            if pipe_entry is not None:
+                flush_newline_lines()
+                i += 1
+                # Bullet lines immediately following a pipe entry's header
+                # line belong to that entry's description -- the same
+                # role they play in the newline-flow, just attached here
+                # since the pipe flow has no separate "date line" step to
+                # transition out of.
+                desc_lines: list[str] = []
+                while i < n and cls._is_bullet(lines[i]):
+                    desc_lines.append(cls._strip_bullet(lines[i]))
+                    i += 1
+                if desc_lines:
+                    pipe_entry = pipe_entry.model_copy(
+                        update={"description": "\n".join(desc_lines)}
+                    )
+                entries.append(pipe_entry)
+            else:
+                pending_newline_lines.append(line)
+                i += 1
+        flush_newline_lines()
+        return entries
+
+    @classmethod
+    def _try_build_pipe_experience_entry(cls, line: str) -> RawExperienceEntry | None:
+        """Build a single experience entry from a pipe-delimited line.
+
+        Args:
+            line: A candidate line, possibly pipe-delimited.
+
+        Returns:
+            A ``RawExperienceEntry`` if ``line`` contains ``|`` and at
+            least one pipe-segment is a date range, otherwise ``None``
+            (so the caller falls back to the newline-flow).
+        """
+        if "|" not in line:
+            return None
+        segments = [seg.strip() for seg in line.split("|") if seg.strip()]
+        if not segments:
+            return None
+
+        date_segment_index: int | None = None
+        dates: list[tuple[str, str]] = []
+        for index, segment in enumerate(segments):
+            found = extractors.extract_dates(segment)
+            if found:
+                date_segment_index = index
+                dates = found
+                break
+        if date_segment_index is None:
+            return None
+
+        non_date_segments = [
+            seg for i, seg in enumerate(segments) if i != date_segment_index
+        ]
+        if not non_date_segments:
+            company = title = None
+        elif len(non_date_segments) == 1:
+            company = title = non_date_segments[0]
+        else:
+            company = non_date_segments[0]
+            title = " ".join(non_date_segments[1:])
+
+        start, end = dates[0]
+        return RawExperienceEntry(
+            company=company,
+            title=title,
+            start_date=start,
+            end_date=end,
+            description=None,
+        )
+
+    @classmethod
+    def _build_experience_entries_newline_flow(
+        cls,
+        lines: list[str],
+    ) -> list[RawExperienceEntry]:
+        """Build raw experience entries from non-pipe, multi-line runs.
+
+        Groups lines into ``(header lines..., date line, bullet
+        lines...)`` runs: the date-range line marks the end of an entry's
+        header block (so the date range is never used as company/title),
+        the first header line(s) become ``company`` and the last header
+        line becomes ``title`` (or both equal a single header line), and
+        subsequent bullet lines become the description. Supports multiple
+        entries per run.
+
+        Args:
+            lines: Stripped, non-empty lines that were not routed to the
+                pipe-delimited flow.
+
+        Returns:
+            List of raw experience entries; empty if no dates found.
+        """
+        entries: list[RawExperienceEntry] = []
+        i, n = 0, len(lines)
+        while i < n:
+            header_lines: list[str] = []
+            while i < n and not extractors.extract_dates(lines[i]):
+                if cls._is_bullet(lines[i]):
+                    i += 1
+                    continue
+                header_lines.append(lines[i])
+                i += 1
+            if i >= n:
+                break
+            dates = extractors.extract_dates(lines[i])
             start, end = dates[0]
+            i += 1
+
+            desc_lines: list[str] = []
+            while i < n and cls._is_bullet(lines[i]):
+                desc_lines.append(cls._strip_bullet(lines[i]))
+                i += 1
+
+            if not header_lines:
+                company = title = None
+            elif len(header_lines) == 1:
+                company = title = header_lines[0]
+            else:
+                company = " ".join(header_lines[:-1])
+                title = header_lines[-1]
+
             entries.append(
                 RawExperienceEntry(
-                    company=line,
-                    title=line,
+                    company=company,
+                    title=title,
                     start_date=start,
                     end_date=end,
-                    description=line,
+                    description="\n".join(desc_lines) if desc_lines else None,
                 )
             )
+        return entries
+
+    _DEGREE_KEYWORDS = (
+        "bachelor",
+        "master",
+        "associate",
+        "diploma",
+        "phd",
+        "doctor",
+        "b.tech",
+        "btech",
+        "b.sc",
+        "bsc",
+        "b.s.",
+        " bs ",
+        "b.e.",
+        " be ",
+        "b.a.",
+        " ba ",
+        "m.tech",
+        "mtech",
+        "m.sc",
+        "msc",
+        "m.s.",
+        " ms ",
+        "m.a.",
+        " ma ",
+        "mba",
+        "mca",
+        "bca",
+    )
+
+    _DEGREE_FIELD_SEPARATOR_RE = re.compile(r"\s+in\s+|\s*[\u2013\u2014-]\s*")
+
+    @classmethod
+    def _split_degree_field(cls, line: str) -> tuple[str, str | None]:
+        """Split a cleaned degree line into ``(degree, field_of_study)``.
+
+        Splits on the first occurrence of ``" in "`` or a hyphen/en-dash/
+        em-dash separator, whichever appears first (Bug #11: dash-style
+        separators such as ``"BS - Data Science"`` (en-dash or hyphen) are
+        just as valid as ``" in "``-style ones).
+
+        Args:
+            line: A degree-line with parenthetical abbreviations already
+                stripped.
+
+        Returns:
+            A ``(degree, field_of_study)`` tuple; ``field_of_study`` is
+            ``None`` if no separator was found.
+        """
+        match = cls._DEGREE_FIELD_SEPARATOR_RE.search(line)
+        if not match:
+            return line.strip(), None
+        degree_part = line[: match.start()].strip()
+        field_part = line[match.end() :].strip()
+        return degree_part, (field_part or None)
+
+    _SECONDARY_EDUCATION_DENYLIST = (
+        "school",
+        "senior secondary",
+        "secondary school",
+        "high school",
+        "class 10",
+        "class 12",
+        "class x",
+        "class xii",
+        "cbse",
+        "icse",
+        "10th",
+        "12th",
+    )
+
+    _GPA_RE = re.compile(
+        r"(?:cgpa|gpa)\s*[:\-]?\s*(\d+(?:\.\d+)?)\s*(?:/\s*(\d+(?:\.\d+)?))?",
+        re.IGNORECASE,
+    )
+    _PERCENTAGE_RE = re.compile(r"\d{1,3}(?:\.\d+)?\s*%")
+
+    @classmethod
+    def _looks_like_degree_line(cls, line: str) -> bool:
+        """Check whether ``line`` contains a recognised degree keyword.
+
+        Includes both spelled-out forms (``"bachelor"``) and common
+        abbreviated forms (``"B.Tech"``, ``"BS"``, ``"M.Sc"``, ...), so a
+        degree line is not silently dropped just because the resume uses
+        an abbreviation rather than the spelled-out word.
+
+        Args:
+            line: A single education-section line.
+
+        Returns:
+            ``True`` if a degree keyword is present.
+        """
+        padded = f" {line.lower()} "
+        return any(kw in padded for kw in cls._DEGREE_KEYWORDS)
+
+    @classmethod
+    def _is_secondary_education_line(cls, line: str) -> bool:
+        """Check whether ``line`` refers to school-level (non-degree) education.
+
+        Args:
+            line: A single education-section line.
+
+        Returns:
+            ``True`` if the line mentions school/Class 10/Class 12/board
+            exam tokens, which should never become a degree-level entry
+            even if a degree keyword coincidentally appears nearby.
+        """
+        lowered = line.lower()
+        return any(token in lowered for token in cls._SECONDARY_EDUCATION_DENYLIST)
+
+    @classmethod
+    def _extract_gpa(cls, line: str) -> float | None:
+        """Extract a GPA/CGPA value from a line, normalised to a 0.0-4.0 scale.
+
+        Recognises ``"CGPA: 8.55 / 10"``, ``"GPA 3.8"``, ``"CGPA-9.1/10"``.
+        When a denominator is present (e.g. ``"/10"``) the value is
+        rescaled to a 4.0 scale; without a denominator the value is
+        assumed to already be on a 4.0 scale.
+
+        Args:
+            line: A single education-section line.
+
+        Returns:
+            The normalised GPA as a float in ``[0.0, 4.0]``, or ``None``
+            if no GPA pattern is found or the result would be out of
+            range.
+        """
+        match = cls._GPA_RE.search(line)
+        if not match:
+            return None
+        value = float(match.group(1))
+        denominator = float(match.group(2)) if match.group(2) else 4.0
+        if denominator <= 0:
+            return None
+        normalised = (value / denominator) * 4.0
+        if not (0.0 <= normalised <= 4.0):
+            return None
+        return round(normalised, 2)
+
+    @classmethod
+    def _is_institution_candidate_shaped(cls, line: str) -> bool:
+        """Check whether ``line`` is shaped like an institution name.
+
+        Rejects lines that are actually dates, GPA/CGPA figures, or
+        percentage/grade figures -- these must never become a spurious
+        new "institution" entry (Bug #6); they are routed to date/GPA
+        extraction instead (Bug #6a).
+
+        Args:
+            line: A candidate line for starting a new education entry.
+
+        Returns:
+            ``True`` if the line is plausibly an institution name.
+        """
+        if extractors.extract_dates(line):
+            return False
+        if cls._GPA_RE.search(line):
+            return False
+        return not cls._PERCENTAGE_RE.search(line)
+
+    @classmethod
+    def _build_education_entries(
+        cls,
+        section_text: str | None,
+    ) -> list[RawEducationEntry]:
+        """Build raw education entries from a section body.
+
+        Groups consecutive non-blank lines per entry. The first
+        institution-shaped line starts a new entry (parenthetical
+        abbreviations like ``"(IIT)"`` are stripped); a later line
+        containing a recognised degree keyword (spelled-out or
+        abbreviated, e.g. ``"B.Tech"``, ``"BS"``) is split into ``degree``
+        and ``field_of_study`` using either ``" in "`` or a dash/en-dash
+        separator. Date-range lines are assigned to the current entry's
+        start/end date rather than becoming a new institution. GPA/CGPA
+        lines are parsed and normalised onto the entry. Lines that are
+        date-shaped, GPA-shaped, percentage-shaped, or refer to
+        school/secondary-level education never start a new entry.
+
+        Args:
+            section_text: Raw body text of the Education section, if
+                detected.
+
+        Returns:
+            List of raw education entries; empty if no section found.
+        """
+        if not section_text:
+            return []
+        abbrev_re = re.compile(r"\s*\([^()]{1,20}\)")
+        lines = [ln.strip() for ln in section_text.splitlines() if ln.strip()]
+
+        entries: list[RawEducationEntry] = []
+        institution: str | None = None
+        degree: str | None = None
+        field_of_study: str | None = None
+        start_date: str | None = None
+        end_date: str | None = None
+        gpa: float | None = None
+        skip_entry = False
+
+        def flush() -> None:
+            if institution is not None and degree is not None and not skip_entry:
+                entries.append(
+                    RawEducationEntry(
+                        institution=institution,
+                        degree=degree,
+                        field_of_study=field_of_study,
+                        start_date=start_date,
+                        end_date=end_date,
+                        gpa=gpa,
+                    )
+                )
+
+        for line in lines:
+            dates = extractors.extract_dates(line)
+            gpa_value = cls._extract_gpa(line)
+
+            if dates:
+                # Bug #6a: assign to the pending entry, never treat as a
+                # new institution candidate.
+                start_date, end_date = dates[0]
+                continue
+
+            if gpa_value is not None:
+                gpa = gpa_value
+                continue
+
+            if cls._looks_like_degree_line(
+                line
+            ) and not cls._is_secondary_education_line(line):
+                cleaned = abbrev_re.sub("", line)
+                degree_part, field_part = cls._split_degree_field(cleaned)
+                degree = degree_part
+                field_of_study = field_part
+            elif (
+                "," in line
+                and len(line.split()) <= 4
+                and institution is not None
+                and degree is None
+            ):
+                # Location line following an institution that hasn't yet
+                # received its degree line (e.g. "Chennai, India") -- not
+                # modelled. Guarded by `degree is None` so this never
+                # fires on a comma-bearing *institution* line itself (Bug
+                # #15: "MIT, USA" must still be able to start a new entry).
+                continue
+            elif cls._PERCENTAGE_RE.search(line):
+                # Grade percentage line not already caught by GPA pattern
+                # (e.g. "CBSE Class 12: 90%") -- never starts a new entry.
+                continue
+            elif not cls._is_institution_candidate_shaped(line):
+                # Defensive: date/GPA/percentage-shaped line that slipped
+                # past the earlier checks -- still never a new institution.
+                continue
+            else:
+                # A new institution-shaped line starts a new entry.
+                flush()
+                candidate_institution = abbrev_re.sub("", line).strip()
+                skip_entry = cls._is_secondary_education_line(candidate_institution)
+                institution = candidate_institution
+                degree = None
+                field_of_study = None
+                start_date = None
+                end_date = None
+                gpa = None
+        flush()
         return entries

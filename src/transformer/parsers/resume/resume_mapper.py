@@ -1,12 +1,17 @@
 """Explicit mapping layer: ExtractedResumeData -> Canonical Candidate Model.
 
 Pure mapping only -- never touches raw text, regex, or files. Mirrors
-``ATSMapper``'s shape and exception behaviour exactly: nested entries
-missing required fields fail the whole parse via ``MappingError``
-(all-or-nothing), no silent per-item skipping.
+``ATSMapper``'s overall shape, but diverges deliberately on one point:
+unlike ATS JSON (structured, all-or-nothing failure is appropriate because
+any invalid entry signals a genuine data-quality problem upstream), resume
+field extraction is inherently heuristic. A single mis-segmented experience
+or education entry should not discard an otherwise-good candidate profile,
+so invalid nested entries are skipped with a logged warning rather than
+failing the whole parse (per-entry graceful degradation).
 """
 
 from datetime import UTC, date, datetime
+import logging
 from typing import Any
 
 from dateutil import parser as dateutil_parser
@@ -28,6 +33,8 @@ from transformer.parsers.resume.extracted_data import (
     RawEducationEntry,
     RawExperienceEntry,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class ResumeMapper:
@@ -72,7 +79,13 @@ class ResumeMapper:
             contact = self._map_contact(data)
             if contact is not None:
                 kwargs["contact"] = contact
-                for field_name in ("email", "phone", "linkedin_url", "github_url"):
+                for field_name in (
+                    "email",
+                    "phone",
+                    "location",
+                    "linkedin_url",
+                    "github_url",
+                ):
                     value = getattr(data, field_name)
                     if value is not None:
                         _record(field_name, value)
@@ -86,22 +99,28 @@ class ResumeMapper:
                 _record("languages", data.languages)
 
             if data.experience_entries:
-                kwargs["experiences"] = [
-                    self._map_experience(item) for item in data.experience_entries
-                ]
-                _record("experiences", data.experience_entries)
+                experiences = self._map_entries_gracefully(
+                    data.experience_entries, self._map_experience, "experience"
+                )
+                if experiences:
+                    kwargs["experiences"] = experiences
+                    _record("experiences", data.experience_entries)
 
             if data.education_entries:
-                kwargs["education"] = [
-                    self._map_education(item) for item in data.education_entries
-                ]
-                _record("education", data.education_entries)
+                education = self._map_entries_gracefully(
+                    data.education_entries, self._map_education, "education"
+                )
+                if education:
+                    kwargs["education"] = education
+                    _record("education", data.education_entries)
 
             if data.certifications:
-                kwargs["certifications"] = [
-                    self._map_certification(item) for item in data.certifications
-                ]
-                _record("certifications", data.certifications)
+                certifications = self._map_entries_gracefully(
+                    data.certifications, self._map_certification, "certification"
+                )
+                if certifications:
+                    kwargs["certifications"] = certifications
+                    _record("certifications", data.certifications)
 
             kwargs["provenance"] = provenance
 
@@ -117,6 +136,41 @@ class ResumeMapper:
                 f"Failed to map resume record to canonical Candidate model: {exc}"
             ) from exc
 
+    @staticmethod
+    def _map_entries_gracefully(
+        items: list[Any],
+        single_mapper: Any,
+        entry_kind: str,
+    ) -> list[Any]:
+        """Map a list of raw entries, skipping (not failing on) invalid ones.
+
+        Args:
+            items: Raw extracted entries (experience/education/
+                certification).
+            single_mapper: Bound method that maps one raw entry to its
+                canonical model, raising ``MappingError`` on invalid
+                required fields.
+            entry_kind: Human-readable entry type, for the warning log.
+
+        Returns:
+            The successfully mapped entries, in original order. Entries
+            that failed to map are omitted, not raised.
+        """
+        mapped: list[Any] = []
+        for index, item in enumerate(items):
+            try:
+                mapped.append(single_mapper(item))
+            except MappingError as exc:
+                logger.warning(
+                    "resume_entry_skipped",
+                    extra={
+                        "entry_kind": entry_kind,
+                        "entry_index": index,
+                        "reason": exc.message,
+                    },
+                )
+        return mapped
+
     def _map_contact(self, data: ExtractedResumeData) -> ContactInfo | None:
         """Map extracted contact fields to a ``ContactInfo`` instance.
 
@@ -129,7 +183,7 @@ class ResumeMapper:
         """
         present = {
             f: getattr(data, f)
-            for f in ("email", "phone", "linkedin_url", "github_url")
+            for f in ("email", "phone", "location", "linkedin_url", "github_url")
             if getattr(data, f) is not None
         }
         if not present:
@@ -176,7 +230,7 @@ class ResumeMapper:
             field_of_study=item.field_of_study,
             start_date=self._optional_date(item.start_date),
             end_date=self._optional_date(item.end_date),
-            gpa=None,
+            gpa=item.gpa,
         )
 
     def _map_certification(self, item: RawCertificationEntry) -> Certification:

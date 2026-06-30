@@ -60,7 +60,9 @@ class TestMapCandidateNegativePath:
         with pytest.raises(MappingError, match="Unable to detect candidate name"):
             ResumeMapper().map_candidate(data)
 
-    def test_experience_missing_company_raises_mapping_error(self) -> None:
+    def test_experience_missing_company_is_skipped_not_raised(self) -> None:
+        """Per-entry graceful degradation: an invalid experience entry is
+        dropped with a warning, the candidate still maps successfully."""
         data = ExtractedResumeData(
             first_name="Jane",
             last_name="Doe",
@@ -68,28 +70,28 @@ class TestMapCandidateNegativePath:
                 RawExperienceEntry(company=None, title="Engineer", start_date="2020")
             ],
         )
-        with pytest.raises(MappingError):
-            ResumeMapper().map_candidate(data)
+        candidate = ResumeMapper().map_candidate(data)
+        assert candidate.experiences == []
 
-    def test_education_missing_degree_raises_mapping_error(self) -> None:
+    def test_education_missing_degree_is_skipped_not_raised(self) -> None:
         data = ExtractedResumeData(
             first_name="Jane",
             last_name="Doe",
             education_entries=[RawEducationEntry(institution="MIT", degree=None)],
         )
-        with pytest.raises(MappingError):
-            ResumeMapper().map_candidate(data)
+        candidate = ResumeMapper().map_candidate(data)
+        assert candidate.education == []
 
-    def test_certification_missing_name_raises_mapping_error(self) -> None:
+    def test_certification_missing_name_is_skipped_not_raised(self) -> None:
         data = ExtractedResumeData(
             first_name="Jane",
             last_name="Doe",
             certifications=[RawCertificationEntry(name=None, issuer="AWS")],
         )
-        with pytest.raises(MappingError):
-            ResumeMapper().map_candidate(data)
+        candidate = ResumeMapper().map_candidate(data)
+        assert candidate.certifications == []
 
-    def test_unparseable_required_start_date_raises_mapping_error(self) -> None:
+    def test_unparseable_required_start_date_is_skipped_not_raised(self) -> None:
         data = ExtractedResumeData(
             first_name="Jane",
             last_name="Doe",
@@ -99,8 +101,56 @@ class TestMapCandidateNegativePath:
                 )
             ],
         )
-        with pytest.raises(MappingError):
-            ResumeMapper().map_candidate(data)
+        candidate = ResumeMapper().map_candidate(data)
+        assert candidate.experiences == []
+
+
+class TestMapCandidatePerEntryGracefulDegradation:
+    """One invalid entry must not discard otherwise-valid sibling entries."""
+
+    def test_one_invalid_experience_does_not_drop_valid_siblings(self) -> None:
+        data = ExtractedResumeData(
+            first_name="Jane",
+            last_name="Doe",
+            experience_entries=[
+                RawExperienceEntry(
+                    company="Acme", title="Engineer", start_date="Jan 2020"
+                ),
+                RawExperienceEntry(title="Missing company and start_date"),
+                RawExperienceEntry(
+                    company="Globex", title="Lead", start_date="Jan 2018"
+                ),
+            ],
+        )
+        candidate = ResumeMapper().map_candidate(data)
+        assert len(candidate.experiences) == 2
+        assert [e.company for e in candidate.experiences] == ["Acme", "Globex"]
+
+    def test_one_invalid_education_does_not_drop_valid_siblings(self) -> None:
+        data = ExtractedResumeData(
+            first_name="Jane",
+            last_name="Doe",
+            education_entries=[
+                RawEducationEntry(institution="MIT", degree="BS"),
+                RawEducationEntry(institution="No Degree University", degree=None),
+            ],
+        )
+        candidate = ResumeMapper().map_candidate(data)
+        assert len(candidate.education) == 1
+        assert candidate.education[0].institution == "MIT"
+
+    def test_all_invalid_entries_yields_empty_list_not_error(self) -> None:
+        data = ExtractedResumeData(
+            first_name="Jane",
+            last_name="Doe",
+            experience_entries=[
+                RawExperienceEntry(title="No company or date"),
+            ],
+        )
+        candidate = ResumeMapper().map_candidate(data)
+        assert candidate.experiences == []
+        # No provenance entry is recorded when every entry was dropped.
+        assert "experiences" not in candidate.provenance
 
 
 class TestOptionalDateParsing:

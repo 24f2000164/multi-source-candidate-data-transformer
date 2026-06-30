@@ -1,0 +1,19 @@
+# Validation rules configuration.
+#
+# Drives RuleRegistry/ValidationEngine via ConfigLoader -> Config ->
+# build_default_registry(config). The engine never reads this file directly.
+
+version: "1.0"
+minimum_supported_version: "1.0"
+current_version: "1.0"
+
+max_string_length: 10000
+default_phone_region: "US"
+
+# Documents the pipeline order enforced by build_default_registry; informational
+# only -- the registry's constructor list is the actual source of truth.
+pipeline_order:
+  - schema
+  - business
+  - duplicate
+  - cross_field
