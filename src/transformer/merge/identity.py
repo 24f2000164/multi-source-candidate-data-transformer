@@ -8,9 +8,15 @@ nested lists needs a stable identity key".
 """
 
 from datetime import date
+import re
 from typing import Any
 
 IdentityKey = tuple[str, ...]
+
+# Strips punctuation that can differ between sources for the same
+# real-world entity (e.g. "NIT, Uttarakhand" vs "NIT Uttarakhand").
+_PUNCT_RE = re.compile(r"[^\w\s]")
+_WS_RE = re.compile(r"\s+")
 
 
 def _norm(value: Any) -> str:
@@ -18,7 +24,12 @@ def _norm(value: Any) -> str:
         return ""
     if isinstance(value, date):
         return value.isoformat()
-    return str(value).strip().lower()
+    # Lowercase → strip punctuation → collapse whitespace.
+    # Punctuation removal handles comma variants like
+    # "NIT, Uttarakhand" vs "NIT Uttarakhand" which are the same entity.
+    text = str(value).strip().lower()
+    text = _PUNCT_RE.sub(" ", text)
+    return _WS_RE.sub(" ", text).strip()
 
 
 def identity_key(item: Any, fields: tuple[str, ...]) -> IdentityKey:

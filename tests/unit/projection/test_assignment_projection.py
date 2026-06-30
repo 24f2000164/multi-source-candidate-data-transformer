@@ -4,9 +4,9 @@ from pathlib import Path
 
 import pytest
 
+from tests.unit.projection._builders import full_candidate, make_candidate
 from transformer.projection.assignment_projection import AssignmentProjection
 from transformer.projection.exceptions import ProjectionError
-from tests.unit.projection._builders import full_candidate, make_candidate
 
 
 def _write_rules(tmp_path: Path, body: str) -> Path:

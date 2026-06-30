@@ -1,0 +1,245 @@
+{
+  "candidate": {
+    "id": "cef8bff7-ad0f-4513-9d0b-eee54eaa3ab4",
+    "first_name": "Jane",
+    "last_name": "Carter",
+    "external_id": "ATS-10293",
+    "contact": {
+      "email": "jane.carter@acme-hr.com",
+      "phone": "+14155550192",
+      "location": "San Francisco, CA",
+      "linkedin_url": "https://linkedin.com/in/janecarter",
+      "github_url": "https://github.com/janecarter"
+    },
+    "experiences": [
+      {
+        "company": "Acme Corp",
+        "title": "Senior Software Engineer",
+        "start_date": "2022-01-01",
+        "end_date": null,
+        "description": "Leads platform engineering team.",
+        "skills": []
+      },
+      {
+        "company": "Senior Software Engineer, Acme Corp",
+        "title": "Senior Software Engineer, Acme Corp",
+        "start_date": "2022-01-01",
+        "end_date": null,
+        "description": "Led migration of monolith to microservices, cutting deploy time 60% Mentored 4 junior engineers",
+        "skills": []
+      },
+      {
+        "company": "Software Engineer, Globex Inc",
+        "title": "Software Engineer, Globex Inc",
+        "start_date": "2019-06-01",
+        "end_date": "2021-12-01",
+        "description": "Built internal analytics dashboard used by 200+ employees",
+        "skills": []
+      }
+    ],
+    "education": [
+      {
+        "institution": "University of California, Berkeley",
+        "degree": "B.S.",
+        "field_of_study": "Computer Science",
+        "start_date": "2015-08-01",
+        "end_date": "2019-05-01",
+        "gpa": null
+      }
+    ],
+    "skills": [
+      "Python",
+      "AWS",
+      "Docker",
+      "Kubernetes",
+      "PostgreSQL",
+      "React",
+      "Terraform"
+    ],
+    "certifications": [
+      {
+        "name": "AWS Certified Solutions Architect",
+        "issuer": null,
+        "issued_date": null,
+        "expiry_date": null
+      }
+    ],
+    "languages": [
+      "English",
+      "Spanish"
+    ],
+    "confidence": {
+      "score": 0.6285714285714284,
+      "fields": {
+        "first_name": {
+          "score": 0.7999999999999999,
+          "source": "ATS"
+        },
+        "last_name": {
+          "score": 0.7999999999999999,
+          "source": "ATS"
+        },
+        "contact": {
+          "score": 0.0,
+          "source": "ATS"
+        },
+        "experiences": {
+          "score": 0.7999999999999999,
+          "source": "ATS"
+        },
+        "education": {
+          "score": 0.7999999999999999,
+          "source": "ATS"
+        },
+        "skills": {
+          "score": 0.7999999999999999,
+          "source": "ATS"
+        }
+      }
+    },
+    "provenance": {
+      "first_name": {
+        "source": "ATS",
+        "raw_value": "Jane",
+        "extracted_at": "2026-06-30T18:53:32.663147Z"
+      },
+      "last_name": {
+        "source": "ATS",
+        "raw_value": "Carter",
+        "extracted_at": "2026-06-30T18:53:32.663147Z"
+      },
+      "external_id": {
+        "source": "ATS",
+        "raw_value": "ATS-10293",
+        "extracted_at": "2026-06-30T18:53:32.663147Z"
+      },
+      "skills": {
+        "source": "RESUME",
+        "raw_value": "['Python', 'AWS', 'Docker', 'Kubernetes', 'PostgreSQL', 'React']",
+        "extracted_at": "2026-06-30T18:53:32.682817Z"
+      },
+      "languages": {
+        "source": "ATS",
+        "raw_value": "['English']",
+        "extracted_at": "2026-06-30T18:53:32.663147Z"
+      },
+      "certifications": {
+        "source": "RESUME",
+        "raw_value": "[RawCertificationEntry(name='AWS Certified Solutions Architect', issuer=None, issued_date=None, expiry_date=None)]",
+        "extracted_at": "2026-06-30T18:53:32.682817Z"
+      },
+      "experiences": {
+        "source": "ATS",
+        "raw_value": "[{'company': 'Acme Corp', 'title': 'Senior Software Engineer', 'start_date': '2022-01-01', 'end_date': None, 'description': 'Leads platform engineering team.'}]",
+        "extracted_at": "2026-06-30T18:53:32.663147Z"
+      },
+      "education": {
+        "source": "ATS",
+        "raw_value": "[{'institution': 'University of California, Berkeley', 'degree': 'B.S.', 'field_of_study': 'Computer Science', 'start_date': '2015-08-01', 'end_date': '2019-05-01'}]",
+        "extracted_at": "2026-06-30T18:53:32.663147Z"
+      },
+      "email": {
+        "source": "ATS",
+        "raw_value": "jane.carter@acme-hr.com",
+        "extracted_at": "2026-06-30T18:53:32.663147Z"
+      },
+      "phone": {
+        "source": "ATS",
+        "raw_value": "+1 415 555 0192",
+        "extracted_at": "2026-06-30T18:53:32.663147Z"
+      },
+      "location": {
+        "source": "ATS",
+        "raw_value": "San Francisco, CA",
+        "extracted_at": "2026-06-30T18:53:32.663147Z"
+      },
+      "linkedin_url": {
+        "source": "RESUME",
+        "raw_value": "https://linkedin.com/in/janecarter",
+        "extracted_at": "2026-06-30T18:53:32.682817Z"
+      },
+      "github_url": {
+        "source": "RESUME",
+        "raw_value": "https://github.com/janecarter",
+        "extracted_at": "2026-06-30T18:53:32.682817Z"
+      }
+    },
+    "schema_version": "1.0"
+  },
+  "projection": {
+    "candidateId": "cef8bff7-ad0f-4513-9d0b-eee54eaa3ab4",
+    "firstName": "Jane",
+    "lastName": "Carter",
+    "externalId": "ATS-10293",
+    "email": "jane.carter@acme-hr.com",
+    "phoneNumber": "+14155550192",
+    "location": "San Francisco, CA",
+    "experience": [
+      {
+        "company": "Acme Corp",
+        "title": "Senior Software Engineer",
+        "start_date": "2022-01-01",
+        "end_date": null,
+        "description": "Leads platform engineering team.",
+        "skills": []
+      },
+      {
+        "company": "Senior Software Engineer, Acme Corp",
+        "title": "Senior Software Engineer, Acme Corp",
+        "start_date": "2022-01-01",
+        "end_date": null,
+        "description": "Led migration of monolith to microservices, cutting deploy time 60% Mentored 4 junior engineers",
+        "skills": []
+      },
+      {
+        "company": "Software Engineer, Globex Inc",
+        "title": "Software Engineer, Globex Inc",
+        "start_date": "2019-06-01",
+        "end_date": "2021-12-01",
+        "description": "Built internal analytics dashboard used by 200+ employees",
+        "skills": []
+      }
+    ],
+    "education": [
+      {
+        "institution": "University of California, Berkeley",
+        "degree": "B.S.",
+        "field_of_study": "Computer Science",
+        "start_date": "2015-08-01",
+        "end_date": "2019-05-01",
+        "gpa": null
+      }
+    ],
+    "skills": [
+      "Python",
+      "AWS",
+      "Docker",
+      "Kubernetes",
+      "PostgreSQL",
+      "React",
+      "Terraform"
+    ],
+    "certifications": [
+      {
+        "name": "AWS Certified Solutions Architect",
+        "issuer": null,
+        "issued_date": null,
+        "expiry_date": null
+      }
+    ],
+    "languages": [
+      "English",
+      "Spanish"
+    ]
+  },
+  "reports": {
+    "projection": {
+      "projection_type": "assignment",
+      "field_count": 12,
+      "warnings": []
+    }
+  },
+  "warnings": [],
+  "success": true,
+  "exit_code": 0
+}

@@ -1,10 +1,14 @@
-# Skill alias configuration.
+ 
 #
 # Keys are matched case-insensitively against cleaned skill strings; values
 # are the canonical display form written into the Candidate. Manually
 # curated -- coverage is intentionally incomplete and should grow as new
 # variants are observed (see IMPLEMENTATION_PLAN risk: "Skill alias table is
 # manually curated -- incomplete coverage").
+#
+# Parenthetical variants (e.g. "Generative AI (LangChain, ...)") are
+# handled in normalize_skill() by stripping the parenthetical and matching
+# only the base name -- no need to enumerate every combination here.
 
 aliases:
   js: "JavaScript"
@@ -36,3 +40,11 @@ aliases:
   c#: "C#"
   cplusplus: "C++"
   c++: "C++"
+  # Typo corrections
+  chromedb: "ChromaDB"
+  chromadb: "ChromaDB"
+  # Subskill / tool aliases
+  openai gpt: "OpenAI GPT"
+  whisper asr: "Whisper"
+  langchain & chromadb: "LangChain"
+ 

@@ -136,6 +136,39 @@ def extract_github_url(text: str) -> str | None:
 _CATEGORY_PREFIX_RE = re.compile(r"^[A-Za-z][A-Za-z &/]{0,40}:\s+")
 
 
+# Matches a lone page-number / footnote-index line: a single integer
+# (optionally preceded by whitespace), nothing else. These appear in
+# PDF-extracted text when the extractor picks up "1" or "2" at the
+# bottom of a page that falls inside a section body.
+_LONE_INTEGER_RE = re.compile(r"^\d{1,3}$")
+
+
+def _join_dangling_parens(lines: list[str]) -> list[str]:
+    """Merge a line whose paren block was split across a PDF page break.
+
+    When PyMuPDF extracts text from a two-column or paginated PDF the
+    content of a single parenthetical (e.g. ``"Generative AI (LangChain,
+    OpenAI GPT,"`` on page 1 and ``"Whisper)"`` on page 2) may arrive as
+    two separate lines.  This pass scans for an unclosed ``(`` and
+    appends subsequent lines (skipping lone page-number lines) until the
+    paren depth returns to zero.
+
+    Args:
+        lines: Lines already stripped of leading/trailing whitespace.
+
+    Returns:
+        Lines with split parentheticals rejoined.
+    """
+    result: list[str] = []
+    for line in lines:
+        if result and result[-1].count("(") > result[-1].count(")"):
+            # Previous line has an unclosed paren -- append current to it.
+            result[-1] = result[-1] + " " + line
+        else:
+            result.append(line)
+    return result
+
+
 def extract_list_items(section_text: str) -> list[str]:
     """Split a section body into discrete items (skills, languages, etc.).
 
@@ -144,9 +177,17 @@ def extract_list_items(section_text: str) -> list[str]:
     then each line is split on commas/bullets/pipes/semicolons -- but a
     comma inside balanced parentheses (e.g. ``"Ensemble Learning
     (LightGBM)"``) is treated as part of the phrase, not a separator, so
-    multi-word/parenthetical skills stay intact. Strips whitespace and
+    multi-word/parenthetical skills stay intact.  Strips whitespace and
     drops empty entries while preserving order and removing duplicates
     (case-insensitive).
+
+    Additionally:
+    * Lone page-number / footnote-index lines (a bare integer such as
+      ``"1"`` or ``"2"`` that the PDF extractor picked up from the bottom
+      of a page) are dropped before any splitting occurs.
+    * Lines whose parenthetical was split across a PDF page break are
+      re-joined before splitting so ``"Generative AI (LangChain, OpenAI
+      GPT,"`` + ``"Whisper)"`` produce a single item.
 
     Args:
         section_text: Raw text body of a section (e.g. the Skills section).
@@ -154,12 +195,17 @@ def extract_list_items(section_text: str) -> list[str]:
     Returns:
         Ordered, deduplicated list of trimmed item strings.
     """
+    # 1. Pre-process: strip, drop lone integers, rejoin broken parens.
+    raw_lines = [
+        _CATEGORY_PREFIX_RE.sub("", ln.strip())
+        for ln in section_text.splitlines()
+    ]
+    raw_lines = [ln for ln in raw_lines if ln and not _LONE_INTEGER_RE.match(ln)]
+    raw_lines = _join_dangling_parens(raw_lines)
+
     seen: set[str] = set()
     result: list[str] = []
-    for line in section_text.splitlines():
-        line = _CATEGORY_PREFIX_RE.sub("", line.strip())
-        if not line:
-            continue
+    for line in raw_lines:
         for item in _split_respecting_parens(line):
             item = item.strip(" \t-\u2022")
             if not item:

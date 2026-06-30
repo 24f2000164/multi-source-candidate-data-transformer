@@ -1,42 +1,71 @@
-# Assignment projection rules.
+# Assignment projection rules — schema documentation.
 #
-# Declares which canonical Candidate fields are included in the
-# "assignment" projection output, and what output key each is renamed to.
+# NOTE: As of Sprint 08 the AssignmentProjection class uses code-driven
+# structural mapping instead of this YAML for field inclusion and renaming.
+# The YAML-only approach could not express the transformations required by
+# the assignment output contract (field combination, list wrapping, nested
+# object decomposition, skills enrichment, provenance flattening).
 #
-# Format:
-#   fields:
-#     <canonical field path>:
-#       output: <output key name>
+# This file is kept for:
+#   - Human-readable documentation of the Internal → Output field mapping.
+#   - Future reference if a new projection type uses the config-driven approach.
 #
-# `<canonical field path>` is a dot-separated path into the candidate's
-# `model_dump(mode="json")` dict (e.g. "contact.email" reaches the email
-# nested under contact). Only field inclusion and renaming are supported --
-# no transform expressions or DSLs.
+# Assignment output schema (assignment default output contract)
+# ------------------------------------------------------------
+#
+#   Internal Candidate field          Output key / structure
+#   ─────────────────────────────     ──────────────────────────────────────
+#   id (UUID)                     →  candidate_id  (string)
+#   first_name + last_name        →  full_name     (string, concatenated)
+#   contact.email                 →  emails        (list[str])
+#   contact.phone                 →  phones        (list[str])
+#   contact.location (free-text)  →  location      {city, region, country}
+#   contact.linkedin_url          →  links.linkedin
+#   contact.github_url            →  links.github
+#   —                             →  headline      (null, reserved)
+#   —                             →  years_experience (null, reserved)
+#   skills (list[str])            →  skills        [{name, confidence, sources}]
+#   experiences (list)            →  experience    (list, renamed)
+#   education (list)              →  education     (list)
+#   provenance (dict)             →  provenance    [{field, source, method}]
+#   confidence.score              →  overall_confidence (float)
 
-version: "1.0"
+version: "2.0"
 
+# Kept for documentation only — not read by AssignmentProjection.
 fields:
   id:
-    output: candidateId
+    output: candidate_id
+    note: "UUID serialised as string"
   first_name:
-    output: firstName
+    output: full_name
+    note: "Combined with last_name in code"
   last_name:
-    output: lastName
-  external_id:
-    output: externalId
+    output: full_name
+    note: "Combined with first_name in code"
   contact.email:
-    output: email
+    output: emails
+    note: "Wrapped in a list"
   contact.phone:
-    output: phoneNumber
+    output: phones
+    note: "Wrapped in a list"
   contact.location:
     output: location
+    note: "Free-text string parsed into {city, region, country}"
+  contact.linkedin_url:
+    output: links.linkedin
+  contact.github_url:
+    output: links.github
   experiences:
     output: experience
+    note: "Field renamed; full object list preserved"
   education:
     output: education
   skills:
     output: skills
-  certifications:
-    output: certifications
-  languages:
-    output: languages
+    note: "list[str] enriched to [{name, confidence, sources}]"
+  provenance:
+    output: provenance
+    note: "dict[field, FieldProvenance] flattened to [{field, source, method}]"
+  confidence.score:
+    output: overall_confidence

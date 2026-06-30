@@ -2,8 +2,8 @@
 
 import json
 
-from transformer.projection.canonical_projection import CanonicalProjection
 from tests.unit.projection._builders import full_candidate, make_candidate
+from transformer.projection.canonical_projection import CanonicalProjection
 
 
 class TestCanonicalProjection:

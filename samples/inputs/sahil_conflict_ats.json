@@ -1,0 +1,33 @@
+{
+  "candidate_id": "ATS-2026-1045",
+  "first_name": "Sahil",
+  "last_name": "Kumar",
+  "email": "sahil.kumar@companymail.com",
+  "phone": "+91 9876543210",
+  "location": "Dehradun, Uttarakhand, India",
+   "linkedin_url": "https://linkedin.com/in/...",
+  "github_url": "https://github.com/...",
+  "education": [
+    {
+      "institution": "National Institute of Technology Uttarakhand",
+      "degree": "B.Tech",
+      "field_of_study": "Electronics and Communication Engineering",
+      "start_date": "2023-08-01",
+      "end_date": null
+    }
+  ],
+  "experience": [],
+  "skills": [
+    "Python",
+    "Machine Learning",
+    "AWS",
+    "Docker",
+    "Terraform",
+    "Kubernetes",
+    "FastAPI"
+  ],
+  "certifications": [],
+  "languages": [
+    "English"
+  ]
+}

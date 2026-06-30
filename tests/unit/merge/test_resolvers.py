@@ -122,7 +122,12 @@ class TestEducationResolver:
             rule,
         )
         assert len(result.value) == 1
-        assert result.value[0] is ats_edu
+        merged = result.value[0]
+        # ATS wins on identity (higher priority source), but gap-fill pulls
+        # field_of_study from RESUME since ATS left it blank — Issue 2 fix.
+        assert merged.institution == "MIT"  # ATS casing preserved
+        assert merged.degree == "BSc"       # ATS casing preserved
+        assert merged.field_of_study == "CS"  # filled from RESUME
 
 
 @pytest.mark.unit

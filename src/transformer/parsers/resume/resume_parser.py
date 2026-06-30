@@ -349,7 +349,12 @@ class ResumeParser(BaseParser):
         if not non_date_segments:
             company = title = None
         elif len(non_date_segments) == 1:
-            company = title = non_date_segments[0]
+            split = cls._split_title_company_segment(non_date_segments[0])
+            if split is not None:
+                company, title = split
+            else:
+                company = title = non_date_segments[0]  # fallback, ambiguous case
+
         else:
             company = non_date_segments[0]
             title = " ".join(non_date_segments[1:])

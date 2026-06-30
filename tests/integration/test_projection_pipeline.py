@@ -4,6 +4,7 @@ import json
 
 import pytest
 
+from tests.unit.projection._builders import full_candidate, make_candidate
 from transformer.projection import (
     AssignmentProjection,
     CanonicalProjection,
@@ -11,7 +12,6 @@ from transformer.projection import (
     ProjectionRegistry,
     UnknownProjectionTypeError,
 )
-from tests.unit.projection._builders import full_candidate, make_candidate
 
 
 def _build_engine() -> ProjectionEngine:

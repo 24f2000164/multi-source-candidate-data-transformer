@@ -1,0 +1,957 @@
+{
+  "candidate": {
+    "id": "cef8bff7-ad0f-4513-9d0b-eee54eaa3ab4",
+    "first_name": "Jane",
+    "last_name": "Carter",
+    "external_id": "ATS-10293",
+    "contact": {
+      "email": "jane.carter@acme-hr.com",
+      "phone": "+14155550192",
+      "location": "San Francisco, CA",
+      "linkedin_url": "https://linkedin.com/in/janecarter",
+      "github_url": "https://github.com/janecarter"
+    },
+    "experiences": [
+      {
+        "company": "Acme Corp",
+        "title": "Senior Software Engineer",
+        "start_date": "2022-01-01",
+        "end_date": null,
+        "description": "Leads platform engineering team.",
+        "skills": []
+      },
+      {
+        "company": "Senior Software Engineer, Acme Corp",
+        "title": "Senior Software Engineer, Acme Corp",
+        "start_date": "2022-01-01",
+        "end_date": null,
+        "description": "Led migration of monolith to microservices, cutting deploy time 60% Mentored 4 junior engineers",
+        "skills": []
+      },
+      {
+        "company": "Software Engineer, Globex Inc",
+        "title": "Software Engineer, Globex Inc",
+        "start_date": "2019-06-01",
+        "end_date": "2021-12-01",
+        "description": "Built internal analytics dashboard used by 200+ employees",
+        "skills": []
+      }
+    ],
+    "education": [
+      {
+        "institution": "University of California, Berkeley",
+        "degree": "B.S.",
+        "field_of_study": "Computer Science",
+        "start_date": "2015-08-01",
+        "end_date": "2019-05-01",
+        "gpa": null
+      }
+    ],
+    "skills": [
+      "Python",
+      "AWS",
+      "Docker",
+      "Kubernetes",
+      "PostgreSQL",
+      "React",
+      "Terraform"
+    ],
+    "certifications": [
+      {
+        "name": "AWS Certified Solutions Architect",
+        "issuer": null,
+        "issued_date": null,
+        "expiry_date": null
+      }
+    ],
+    "languages": [
+      "English",
+      "Spanish"
+    ],
+    "confidence": {
+      "score": 0.6285714285714284,
+      "fields": {
+        "first_name": {
+          "score": 0.7999999999999999,
+          "source": "ATS"
+        },
+        "last_name": {
+          "score": 0.7999999999999999,
+          "source": "ATS"
+        },
+        "contact": {
+          "score": 0.0,
+          "source": "ATS"
+        },
+        "experiences": {
+          "score": 0.7999999999999999,
+          "source": "ATS"
+        },
+        "education": {
+          "score": 0.7999999999999999,
+          "source": "ATS"
+        },
+        "skills": {
+          "score": 0.7999999999999999,
+          "source": "ATS"
+        }
+      }
+    },
+    "provenance": {
+      "first_name": {
+        "source": "ATS",
+        "raw_value": "Jane",
+        "extracted_at": "2026-06-30T18:53:32.663147Z"
+      },
+      "last_name": {
+        "source": "ATS",
+        "raw_value": "Carter",
+        "extracted_at": "2026-06-30T18:53:32.663147Z"
+      },
+      "external_id": {
+        "source": "ATS",
+        "raw_value": "ATS-10293",
+        "extracted_at": "2026-06-30T18:53:32.663147Z"
+      },
+      "skills": {
+        "source": "RESUME",
+        "raw_value": "['Python', 'AWS', 'Docker', 'Kubernetes', 'PostgreSQL', 'React']",
+        "extracted_at": "2026-06-30T18:53:32.682817Z"
+      },
+      "languages": {
+        "source": "ATS",
+        "raw_value": "['English']",
+        "extracted_at": "2026-06-30T18:53:32.663147Z"
+      },
+      "certifications": {
+        "source": "RESUME",
+        "raw_value": "[RawCertificationEntry(name='AWS Certified Solutions Architect', issuer=None, issued_date=None, expiry_date=None)]",
+        "extracted_at": "2026-06-30T18:53:32.682817Z"
+      },
+      "experiences": {
+        "source": "ATS",
+        "raw_value": "[{'company': 'Acme Corp', 'title': 'Senior Software Engineer', 'start_date': '2022-01-01', 'end_date': None, 'description': 'Leads platform engineering team.'}]",
+        "extracted_at": "2026-06-30T18:53:32.663147Z"
+      },
+      "education": {
+        "source": "ATS",
+        "raw_value": "[{'institution': 'University of California, Berkeley', 'degree': 'B.S.', 'field_of_study': 'Computer Science', 'start_date': '2015-08-01', 'end_date': '2019-05-01'}]",
+        "extracted_at": "2026-06-30T18:53:32.663147Z"
+      },
+      "email": {
+        "source": "ATS",
+        "raw_value": "jane.carter@acme-hr.com",
+        "extracted_at": "2026-06-30T18:53:32.663147Z"
+      },
+      "phone": {
+        "source": "ATS",
+        "raw_value": "+1 415 555 0192",
+        "extracted_at": "2026-06-30T18:53:32.663147Z"
+      },
+      "location": {
+        "source": "ATS",
+        "raw_value": "San Francisco, CA",
+        "extracted_at": "2026-06-30T18:53:32.663147Z"
+      },
+      "linkedin_url": {
+        "source": "RESUME",
+        "raw_value": "https://linkedin.com/in/janecarter",
+        "extracted_at": "2026-06-30T18:53:32.682817Z"
+      },
+      "github_url": {
+        "source": "RESUME",
+        "raw_value": "https://github.com/janecarter",
+        "extracted_at": "2026-06-30T18:53:32.682817Z"
+      }
+    },
+    "schema_version": "1.0"
+  },
+  "projection": {
+    "id": "cef8bff7-ad0f-4513-9d0b-eee54eaa3ab4",
+    "first_name": "Jane",
+    "last_name": "Carter",
+    "external_id": "ATS-10293",
+    "contact": {
+      "email": "jane.carter@acme-hr.com",
+      "phone": "+14155550192",
+      "location": "San Francisco, CA",
+      "linkedin_url": "https://linkedin.com/in/janecarter",
+      "github_url": "https://github.com/janecarter"
+    },
+    "experiences": [
+      {
+        "company": "Acme Corp",
+        "title": "Senior Software Engineer",
+        "start_date": "2022-01-01",
+        "end_date": null,
+        "description": "Leads platform engineering team.",
+        "skills": []
+      },
+      {
+        "company": "Senior Software Engineer, Acme Corp",
+        "title": "Senior Software Engineer, Acme Corp",
+        "start_date": "2022-01-01",
+        "end_date": null,
+        "description": "Led migration of monolith to microservices, cutting deploy time 60% Mentored 4 junior engineers",
+        "skills": []
+      },
+      {
+        "company": "Software Engineer, Globex Inc",
+        "title": "Software Engineer, Globex Inc",
+        "start_date": "2019-06-01",
+        "end_date": "2021-12-01",
+        "description": "Built internal analytics dashboard used by 200+ employees",
+        "skills": []
+      }
+    ],
+    "education": [
+      {
+        "institution": "University of California, Berkeley",
+        "degree": "B.S.",
+        "field_of_study": "Computer Science",
+        "start_date": "2015-08-01",
+        "end_date": "2019-05-01",
+        "gpa": null
+      }
+    ],
+    "skills": [
+      "Python",
+      "AWS",
+      "Docker",
+      "Kubernetes",
+      "PostgreSQL",
+      "React",
+      "Terraform"
+    ],
+    "certifications": [
+      {
+        "name": "AWS Certified Solutions Architect",
+        "issuer": null,
+        "issued_date": null,
+        "expiry_date": null
+      }
+    ],
+    "languages": [
+      "English",
+      "Spanish"
+    ],
+    "confidence": {
+      "score": 0.6285714285714284,
+      "fields": {
+        "first_name": {
+          "score": 0.7999999999999999,
+          "source": "ATS"
+        },
+        "last_name": {
+          "score": 0.7999999999999999,
+          "source": "ATS"
+        },
+        "contact": {
+          "score": 0.0,
+          "source": "ATS"
+        },
+        "experiences": {
+          "score": 0.7999999999999999,
+          "source": "ATS"
+        },
+        "education": {
+          "score": 0.7999999999999999,
+          "source": "ATS"
+        },
+        "skills": {
+          "score": 0.7999999999999999,
+          "source": "ATS"
+        }
+      }
+    },
+    "provenance": {
+      "first_name": {
+        "source": "ATS",
+        "raw_value": "Jane",
+        "extracted_at": "2026-06-30T18:53:32.663147Z"
+      },
+      "last_name": {
+        "source": "ATS",
+        "raw_value": "Carter",
+        "extracted_at": "2026-06-30T18:53:32.663147Z"
+      },
+      "external_id": {
+        "source": "ATS",
+        "raw_value": "ATS-10293",
+        "extracted_at": "2026-06-30T18:53:32.663147Z"
+      },
+      "skills": {
+        "source": "RESUME",
+        "raw_value": "['Python', 'AWS', 'Docker', 'Kubernetes', 'PostgreSQL', 'React']",
+        "extracted_at": "2026-06-30T18:53:32.682817Z"
+      },
+      "languages": {
+        "source": "ATS",
+        "raw_value": "['English']",
+        "extracted_at": "2026-06-30T18:53:32.663147Z"
+      },
+      "certifications": {
+        "source": "RESUME",
+        "raw_value": "[RawCertificationEntry(name='AWS Certified Solutions Architect', issuer=None, issued_date=None, expiry_date=None)]",
+        "extracted_at": "2026-06-30T18:53:32.682817Z"
+      },
+      "experiences": {
+        "source": "ATS",
+        "raw_value": "[{'company': 'Acme Corp', 'title': 'Senior Software Engineer', 'start_date': '2022-01-01', 'end_date': None, 'description': 'Leads platform engineering team.'}]",
+        "extracted_at": "2026-06-30T18:53:32.663147Z"
+      },
+      "education": {
+        "source": "ATS",
+        "raw_value": "[{'institution': 'University of California, Berkeley', 'degree': 'B.S.', 'field_of_study': 'Computer Science', 'start_date': '2015-08-01', 'end_date': '2019-05-01'}]",
+        "extracted_at": "2026-06-30T18:53:32.663147Z"
+      },
+      "email": {
+        "source": "ATS",
+        "raw_value": "jane.carter@acme-hr.com",
+        "extracted_at": "2026-06-30T18:53:32.663147Z"
+      },
+      "phone": {
+        "source": "ATS",
+        "raw_value": "+1 415 555 0192",
+        "extracted_at": "2026-06-30T18:53:32.663147Z"
+      },
+      "location": {
+        "source": "ATS",
+        "raw_value": "San Francisco, CA",
+        "extracted_at": "2026-06-30T18:53:32.663147Z"
+      },
+      "linkedin_url": {
+        "source": "RESUME",
+        "raw_value": "https://linkedin.com/in/janecarter",
+        "extracted_at": "2026-06-30T18:53:32.682817Z"
+      },
+      "github_url": {
+        "source": "RESUME",
+        "raw_value": "https://github.com/janecarter",
+        "extracted_at": "2026-06-30T18:53:32.682817Z"
+      }
+    },
+    "schema_version": "1.0"
+  },
+  "reports": {
+    "ats_parser": {
+      "source": "ATS",
+      "path": "samples\\inputs\\jane_carter_ats.json",
+      "warnings": []
+    },
+    "resume_parser": {
+      "source": "RESUME",
+      "path": "samples\\resumes\\jane_carter_resume.docx",
+      "warnings": []
+    },
+    "normalization": {
+      "sources": [
+        "ATS",
+        "RESUME"
+      ],
+      "warnings": []
+    },
+    "merge": {
+      "fields": [
+        {
+          "field": "first_name",
+          "strategy": "source_priority",
+          "sources_considered": [
+            "ATS",
+            "RESUME"
+          ],
+          "contributing_sources": [
+            "ATS",
+            "RESUME"
+          ],
+          "conflict": false,
+          "chosen_value_repr": "'Jane'",
+          "provenance": {
+            "ATS": {
+              "source": "ATS",
+              "raw_value": "Jane",
+              "extracted_at": "2026-06-30T18:53:32.663147Z"
+            },
+            "RESUME": {
+              "source": "RESUME",
+              "raw_value": "Jane",
+              "extracted_at": "2026-06-30T18:53:32.682817Z"
+            }
+          }
+        },
+        {
+          "field": "last_name",
+          "strategy": "source_priority",
+          "sources_considered": [
+            "ATS",
+            "RESUME"
+          ],
+          "contributing_sources": [
+            "ATS",
+            "RESUME"
+          ],
+          "conflict": false,
+          "chosen_value_repr": "'Carter'",
+          "provenance": {
+            "ATS": {
+              "source": "ATS",
+              "raw_value": "Carter",
+              "extracted_at": "2026-06-30T18:53:32.663147Z"
+            },
+            "RESUME": {
+              "source": "RESUME",
+              "raw_value": "Carter",
+              "extracted_at": "2026-06-30T18:53:32.682817Z"
+            }
+          }
+        },
+        {
+          "field": "external_id",
+          "strategy": "source_priority",
+          "sources_considered": [
+            "ATS",
+            "RESUME"
+          ],
+          "contributing_sources": [
+            "ATS"
+          ],
+          "conflict": false,
+          "chosen_value_repr": "'ATS-10293'",
+          "provenance": {
+            "ATS": {
+              "source": "ATS",
+              "raw_value": "ATS-10293",
+              "extracted_at": "2026-06-30T18:53:32.663147Z"
+            }
+          }
+        },
+        {
+          "field": "skills",
+          "strategy": "union",
+          "sources_considered": [
+            "ATS",
+            "RESUME"
+          ],
+          "contributing_sources": [
+            "RESUME",
+            "ATS"
+          ],
+          "conflict": false,
+          "chosen_value_repr": "['Python', 'AWS', 'Docker', 'Kubernetes', 'PostgreSQL', 'React', 'Terraform']",
+          "provenance": {
+            "ATS": {
+              "source": "ATS",
+              "raw_value": "['Python', 'AWS', 'Terraform']",
+              "extracted_at": "2026-06-30T18:53:32.663147Z"
+            },
+            "RESUME": {
+              "source": "RESUME",
+              "raw_value": "['Python', 'AWS', 'Docker', 'Kubernetes', 'PostgreSQL', 'React']",
+              "extracted_at": "2026-06-30T18:53:32.682817Z"
+            }
+          }
+        },
+        {
+          "field": "languages",
+          "strategy": "union",
+          "sources_considered": [
+            "ATS",
+            "RESUME"
+          ],
+          "contributing_sources": [
+            "ATS",
+            "RESUME"
+          ],
+          "conflict": false,
+          "chosen_value_repr": "['English', 'Spanish']",
+          "provenance": {
+            "ATS": {
+              "source": "ATS",
+              "raw_value": "['English']",
+              "extracted_at": "2026-06-30T18:53:32.663147Z"
+            },
+            "RESUME": {
+              "source": "RESUME",
+              "raw_value": "['English', 'Spanish']",
+              "extracted_at": "2026-06-30T18:53:32.682817Z"
+            }
+          }
+        },
+        {
+          "field": "certifications",
+          "strategy": "union",
+          "sources_considered": [
+            "ATS",
+            "RESUME"
+          ],
+          "contributing_sources": [
+            "RESUME"
+          ],
+          "conflict": false,
+          "chosen_value_repr": "[Certification(name='AWS Certified Solutions Architect', issuer=None, issued_date=None, expiry_date=None)]",
+          "provenance": {
+            "RESUME": {
+              "source": "RESUME",
+              "raw_value": "[RawCertificationEntry(name='AWS Certified Solutions Architect', issuer=None, issued_date=None, expiry_date=None)]",
+              "extracted_at": "2026-06-30T18:53:32.682817Z"
+            }
+          }
+        },
+        {
+          "field": "experiences",
+          "strategy": "union",
+          "sources_considered": [
+            "ATS",
+            "RESUME"
+          ],
+          "contributing_sources": [
+            "ATS",
+            "RESUME"
+          ],
+          "conflict": false,
+          "chosen_value_repr": "[WorkExperience(company='Acme Corp', title='Senior Software Engineer', start_date=datetime.date(2022, 1, 1), end_date=None, description='Leads platform engineering team.', skills=[]), WorkExperience(company='Senior Software Engineer, Acme Corp', title='Senior Software Engineer, Acme Corp', start_date=datetime.date(2022, 1, 1), end_date=None, description='Led migration of monolith to microservices, cutting deploy time 60% Mentored 4 junior engineers', skills=[]), WorkExperience(company='Software Engineer, Globex Inc', title='Software Engineer, Globex Inc', start_date=datetime.date(2019, 6, 1), end_date=datetime.date(2021, 12, 1), description='Built internal analytics dashboard used by 200+ employees', skills=[])]",
+          "provenance": {
+            "ATS": {
+              "source": "ATS",
+              "raw_value": "[{'company': 'Acme Corp', 'title': 'Senior Software Engineer', 'start_date': '2022-01-01', 'end_date': None, 'description': 'Leads platform engineering team.'}]",
+              "extracted_at": "2026-06-30T18:53:32.663147Z"
+            },
+            "RESUME": {
+              "source": "RESUME",
+              "raw_value": "[RawExperienceEntry(company='Senior Software Engineer, Acme Corp', title='Senior Software Engineer, Acme Corp', start_date='Jan 2022', end_date='Present', description='Led migration of monolith to microservices, cutting deploy time 60%\\nMentored 4 junior engineers'), RawExperienceEntry(company='Software Engineer, Globex Inc', title='Software Engineer, Globex Inc', start_date='Jun 2019', end_date='Dec 2021', description='Built internal analytics dashboard used by 200+ employees')]",
+              "extracted_at": "2026-06-30T18:53:32.682817Z"
+            }
+          }
+        },
+        {
+          "field": "education",
+          "strategy": "union",
+          "sources_considered": [
+            "ATS",
+            "RESUME"
+          ],
+          "contributing_sources": [
+            "ATS",
+            "RESUME"
+          ],
+          "conflict": false,
+          "chosen_value_repr": "[Education(institution='University of California, Berkeley', degree='B.S.', field_of_study='Computer Science', start_date=datetime.date(2015, 8, 1), end_date=datetime.date(2019, 5, 1), gpa=None)]",
+          "provenance": {
+            "ATS": {
+              "source": "ATS",
+              "raw_value": "[{'institution': 'University of California, Berkeley', 'degree': 'B.S.', 'field_of_study': 'Computer Science', 'start_date': '2015-08-01', 'end_date': '2019-05-01'}]",
+              "extracted_at": "2026-06-30T18:53:32.663147Z"
+            },
+            "RESUME": {
+              "source": "RESUME",
+              "raw_value": "[RawEducationEntry(institution='University of California, Berkeley', degree='B.S.', field_of_study='Computer Science', start_date='Aug 2015', end_date='May 2019', gpa=3.7)]",
+              "extracted_at": "2026-06-30T18:53:32.682817Z"
+            }
+          }
+        },
+        {
+          "field": "contact.email",
+          "strategy": "source_priority",
+          "sources_considered": [
+            "ATS",
+            "RESUME"
+          ],
+          "contributing_sources": [
+            "ATS",
+            "RESUME"
+          ],
+          "conflict": true,
+          "chosen_value_repr": "'jane.carter@acme-hr.com'",
+          "provenance": {
+            "ATS": {
+              "source": "ATS",
+              "raw_value": "jane.carter@acme-hr.com",
+              "extracted_at": "2026-06-30T18:53:32.663147Z"
+            },
+            "RESUME": {
+              "source": "RESUME",
+              "raw_value": "jane.carter@example.com",
+              "extracted_at": "2026-06-30T18:53:32.682817Z"
+            }
+          }
+        },
+        {
+          "field": "contact.phone",
+          "strategy": "source_priority",
+          "sources_considered": [
+            "ATS",
+            "RESUME"
+          ],
+          "contributing_sources": [
+            "ATS",
+            "RESUME"
+          ],
+          "conflict": false,
+          "chosen_value_repr": "'+14155550192'",
+          "provenance": {
+            "ATS": {
+              "source": "ATS",
+              "raw_value": "+1 415 555 0192",
+              "extracted_at": "2026-06-30T18:53:32.663147Z"
+            },
+            "RESUME": {
+              "source": "RESUME",
+              "raw_value": "+1 415 555 0192",
+              "extracted_at": "2026-06-30T18:53:32.682817Z"
+            }
+          }
+        },
+        {
+          "field": "contact.location",
+          "strategy": "first_non_empty",
+          "sources_considered": [
+            "ATS",
+            "RESUME"
+          ],
+          "contributing_sources": [
+            "ATS"
+          ],
+          "conflict": false,
+          "chosen_value_repr": "'San Francisco, CA'",
+          "provenance": {
+            "ATS": {
+              "source": "ATS",
+              "raw_value": "San Francisco, CA",
+              "extracted_at": "2026-06-30T18:53:32.663147Z"
+            },
+            "RESUME": {
+              "source": "RESUME",
+              "raw_value": "San Francisco, CA",
+              "extracted_at": "2026-06-30T18:53:32.682817Z"
+            }
+          }
+        },
+        {
+          "field": "contact.linkedin_url",
+          "strategy": "first_non_empty",
+          "sources_considered": [
+            "ATS",
+            "RESUME"
+          ],
+          "contributing_sources": [
+            "RESUME"
+          ],
+          "conflict": false,
+          "chosen_value_repr": "AnyHttpUrl('https://linkedin.com/in/janecarter')",
+          "provenance": {
+            "ATS": {
+              "source": "ATS",
+              "raw_value": "https://linkedin.com/in/janecarter",
+              "extracted_at": "2026-06-30T18:53:32.663147Z"
+            },
+            "RESUME": {
+              "source": "RESUME",
+              "raw_value": "https://linkedin.com/in/janecarter",
+              "extracted_at": "2026-06-30T18:53:32.682817Z"
+            }
+          }
+        },
+        {
+          "field": "contact.github_url",
+          "strategy": "first_non_empty",
+          "sources_considered": [
+            "ATS",
+            "RESUME"
+          ],
+          "contributing_sources": [
+            "RESUME"
+          ],
+          "conflict": false,
+          "chosen_value_repr": "AnyHttpUrl('https://github.com/janecarter')",
+          "provenance": {
+            "RESUME": {
+              "source": "RESUME",
+              "raw_value": "https://github.com/janecarter",
+              "extracted_at": "2026-06-30T18:53:32.682817Z"
+            }
+          }
+        }
+      ],
+      "warnings": [
+        "field 'contact.email': sources disagree, used ATS"
+      ]
+    },
+    "confidence": {
+      "field_scores": {
+        "first_name": {
+          "score": 0.7999999999999999,
+          "source": "ATS"
+        },
+        "last_name": {
+          "score": 0.7999999999999999,
+          "source": "ATS"
+        },
+        "contact": {
+          "score": 0.0,
+          "source": "ATS"
+        },
+        "experiences": {
+          "score": 0.7999999999999999,
+          "source": "ATS"
+        },
+        "education": {
+          "score": 0.7999999999999999,
+          "source": "ATS"
+        },
+        "skills": {
+          "score": 0.7999999999999999,
+          "source": "ATS"
+        }
+      },
+      "overall_score": 0.6285714285714284,
+      "calculation_trace": [
+        {
+          "field": "first_name",
+          "strategy": "source_weight",
+          "old_score": 0.0,
+          "delta": 0.7,
+          "new_score": 0.7,
+          "reason": "base weight from sources ('ATS', 'RESUME')"
+        },
+        {
+          "field": "first_name",
+          "strategy": "agreement",
+          "old_score": 0.7,
+          "delta": 0.1,
+          "new_score": 0.7999999999999999,
+          "reason": "2 sources agreed"
+        },
+        {
+          "field": "first_name",
+          "strategy": "conflict_penalty",
+          "old_score": 0.7999999999999999,
+          "delta": 0.0,
+          "new_score": 0.7999999999999999,
+          "reason": "no conflict"
+        },
+        {
+          "field": "first_name",
+          "strategy": "missing_field",
+          "old_score": 0.7999999999999999,
+          "delta": 0.0,
+          "new_score": 0.7999999999999999,
+          "reason": "field value present"
+        },
+        {
+          "field": "last_name",
+          "strategy": "source_weight",
+          "old_score": 0.0,
+          "delta": 0.7,
+          "new_score": 0.7,
+          "reason": "base weight from sources ('ATS', 'RESUME')"
+        },
+        {
+          "field": "last_name",
+          "strategy": "agreement",
+          "old_score": 0.7,
+          "delta": 0.1,
+          "new_score": 0.7999999999999999,
+          "reason": "2 sources agreed"
+        },
+        {
+          "field": "last_name",
+          "strategy": "conflict_penalty",
+          "old_score": 0.7999999999999999,
+          "delta": 0.0,
+          "new_score": 0.7999999999999999,
+          "reason": "no conflict"
+        },
+        {
+          "field": "last_name",
+          "strategy": "missing_field",
+          "old_score": 0.7999999999999999,
+          "delta": 0.0,
+          "new_score": 0.7999999999999999,
+          "reason": "field value present"
+        },
+        {
+          "field": "contact",
+          "strategy": "source_weight",
+          "old_score": 0.0,
+          "delta": 0.0,
+          "new_score": 0.0,
+          "reason": "no sources considered"
+        },
+        {
+          "field": "contact",
+          "strategy": "agreement",
+          "old_score": 0.0,
+          "delta": 0.0,
+          "new_score": 0.0,
+          "reason": "no multi-source agreement"
+        },
+        {
+          "field": "contact",
+          "strategy": "conflict_penalty",
+          "old_score": 0.0,
+          "delta": 0.0,
+          "new_score": 0.0,
+          "reason": "no conflict"
+        },
+        {
+          "field": "contact",
+          "strategy": "missing_field",
+          "old_score": 0.0,
+          "delta": 0.0,
+          "new_score": 0.0,
+          "reason": "field value present"
+        },
+        {
+          "field": "experiences",
+          "strategy": "source_weight",
+          "old_score": 0.0,
+          "delta": 0.7,
+          "new_score": 0.7,
+          "reason": "base weight from sources ('ATS', 'RESUME')"
+        },
+        {
+          "field": "experiences",
+          "strategy": "agreement",
+          "old_score": 0.7,
+          "delta": 0.1,
+          "new_score": 0.7999999999999999,
+          "reason": "2 sources agreed"
+        },
+        {
+          "field": "experiences",
+          "strategy": "conflict_penalty",
+          "old_score": 0.7999999999999999,
+          "delta": 0.0,
+          "new_score": 0.7999999999999999,
+          "reason": "no conflict"
+        },
+        {
+          "field": "experiences",
+          "strategy": "missing_field",
+          "old_score": 0.7999999999999999,
+          "delta": 0.0,
+          "new_score": 0.7999999999999999,
+          "reason": "field value present"
+        },
+        {
+          "field": "education",
+          "strategy": "source_weight",
+          "old_score": 0.0,
+          "delta": 0.7,
+          "new_score": 0.7,
+          "reason": "base weight from sources ('ATS', 'RESUME')"
+        },
+        {
+          "field": "education",
+          "strategy": "agreement",
+          "old_score": 0.7,
+          "delta": 0.1,
+          "new_score": 0.7999999999999999,
+          "reason": "2 sources agreed"
+        },
+        {
+          "field": "education",
+          "strategy": "conflict_penalty",
+          "old_score": 0.7999999999999999,
+          "delta": 0.0,
+          "new_score": 0.7999999999999999,
+          "reason": "no conflict"
+        },
+        {
+          "field": "education",
+          "strategy": "missing_field",
+          "old_score": 0.7999999999999999,
+          "delta": 0.0,
+          "new_score": 0.7999999999999999,
+          "reason": "field value present"
+        },
+        {
+          "field": "skills",
+          "strategy": "source_weight",
+          "old_score": 0.0,
+          "delta": 0.7,
+          "new_score": 0.7,
+          "reason": "base weight from sources ('ATS', 'RESUME')"
+        },
+        {
+          "field": "skills",
+          "strategy": "agreement",
+          "old_score": 0.7,
+          "delta": 0.1,
+          "new_score": 0.7999999999999999,
+          "reason": "2 sources agreed"
+        },
+        {
+          "field": "skills",
+          "strategy": "conflict_penalty",
+          "old_score": 0.7999999999999999,
+          "delta": 0.0,
+          "new_score": 0.7999999999999999,
+          "reason": "no conflict"
+        },
+        {
+          "field": "skills",
+          "strategy": "missing_field",
+          "old_score": 0.7999999999999999,
+          "delta": 0.0,
+          "new_score": 0.7999999999999999,
+          "reason": "field value present"
+        }
+      ],
+      "source_weights": {
+        "ATS": 0.7,
+        "RESUME": 0.6
+      },
+      "penalties": [],
+      "bonuses": [
+        "first_name: base weight from sources ('ATS', 'RESUME') (+0.700)",
+        "first_name: 2 sources agreed (+0.100)",
+        "last_name: base weight from sources ('ATS', 'RESUME') (+0.700)",
+        "last_name: 2 sources agreed (+0.100)",
+        "experiences: base weight from sources ('ATS', 'RESUME') (+0.700)",
+        "experiences: 2 sources agreed (+0.100)",
+        "education: base weight from sources ('ATS', 'RESUME') (+0.700)",
+        "education: 2 sources agreed (+0.100)",
+        "skills: base weight from sources ('ATS', 'RESUME') (+0.700)",
+        "skills: 2 sources agreed (+0.100)"
+      ],
+      "config_version": "1.0"
+    },
+    "validation": {
+      "issues": [],
+      "rules_executed": [
+        "required_fields",
+        "schema_version",
+        "confidence_values",
+        "string_length",
+        "unicode_confusables",
+        "id_uuid",
+        "email_format",
+        "phone_format",
+        "url_format",
+        "external_id_format",
+        "duplicate_experience",
+        "duplicate_education",
+        "date_order",
+        "confidence_field_consistency"
+      ],
+      "rules_failed": [],
+      "errors": [],
+      "warnings": [],
+      "execution_time_ms": 0.14810000720899552,
+      "is_valid": true,
+      "summary": "PASS: 0 error(s), 0 warning(s) across 14 rule(s)",
+      "config_version": "1.0"
+    },
+    "projection": {
+      "projection_type": "canonical",
+      "field_count": 13,
+      "warnings": []
+    }
+  },
+  "warnings": [
+    "field 'contact.email': sources disagree, used ATS"
+  ],
+  "success": true,
+  "exit_code": 0
+}

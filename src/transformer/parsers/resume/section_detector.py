@@ -102,6 +102,14 @@ _STOP_SECTIONS: frozenset[str] = frozenset(
         "objective",
         "profile",
         "extracurricular activities",
+        "extra-curricular activities",
+        "extra curricular activities",
+        "positions of responsibility",
+        "positions",
+        "responsibilities",
+        "professional summary",
+        "about me",
+        "contact",
     }
 )
 

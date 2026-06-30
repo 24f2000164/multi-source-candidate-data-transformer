@@ -1,0 +1,47 @@
+{
+  "candidate_id": "ATS-2026-1001",
+  "first_name": "Sahil",
+  "last_name": "Kumar",
+  "email": "24f2000164@ds.study.iitm.ac.in",
+  "phone": "+91 7668470448",
+  "location": "Hathras, Uttar Pradesh, India",
+  "linkedin_url": "https://linkedin.com/in/...",
+  "github_url": "https://github.com/...",
+  "education": [
+    {
+      "institution": "National Institute of Technology Uttarakhand",
+      "degree": "B.Tech",
+      "field_of_study": "Electronics and Communication Engineering",
+      "start_date": "2023-08-01",
+      "end_date": null
+    },
+    {
+      "institution": "Indian Institute of Technology Madras",
+      "degree": "B.Sc",
+      "field_of_study": "Programming and Data Science",
+      "start_date": "2023-03-01",
+      "end_date": null
+    }
+  ],
+  "experience": [],
+  "skills": [
+    "Python",
+    "Machine Learning",
+    "Deep Learning",
+    "Generative AI",
+    "LangChain",
+    "FastAPI",
+    "Docker",
+    "Git",
+    "PostgreSQL"
+  ],
+  "certifications": [
+    {
+      "name": "IIT Madras Programming and Data Science"
+    }
+  ],
+  "languages": [
+    "Hindi",
+    "English"
+  ]
+}

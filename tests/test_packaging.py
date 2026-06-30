@@ -1,7 +1,7 @@
 """Packaging metadata and distribution-surface tests."""
 
-import tomllib
 from pathlib import Path
+import tomllib
 
 import transformer
 from transformer.cli import app

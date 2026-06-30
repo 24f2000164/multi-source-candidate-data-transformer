@@ -196,9 +196,55 @@ class StructuredListResolver(ListResolver):
                     if key not in seen:
                         seen[key] = item
                         merged.append(item)
+                    else:
+                        existing = seen[key]
+                        filled = StructuredListResolver._fill_missing_fields(
+                            existing, item
+                        )
+                        if filled is not existing:
+                            index = merged.index(existing)
+                            merged[index] = filled
+                            seen[key] = filled
             return merged
 
         return _merge
+
+    @staticmethod
+    def _fill_missing_fields(existing: Any, incoming: Any) -> Any:
+        """Fill ``existing``'s blank fields from ``incoming``, never overwriting.
+
+        Applies to any two same-type pydantic model instances that share
+        an identity key (e.g. matched by institution+degree). ``existing``
+        is the higher-priority (earlier-source) item and is preserved as
+        the base; only fields where ``existing`` has no usable value
+        (``None`` or blank string) are filled in from ``incoming``. This
+        replaces "first-match-wins whole-object" with a field-level
+        gap-fill, so lower-priority sources never lose data the
+        higher-priority source simply didn't have (e.g. GPA).
+
+        Args:
+            existing: The item already kept for this identity key
+                (highest priority so far).
+            incoming: A later, lower-priority item sharing the same
+                identity key.
+
+        Returns:
+            ``existing`` unchanged if it had no blank fields fillable from
+            ``incoming``, otherwise a new instance with the gaps filled.
+        """
+        if type(existing) is not type(incoming):
+            return existing
+        fill: dict[str, Any] = {}
+        for field_name in type(existing).model_fields:
+            current_value = getattr(existing, field_name)
+            if current_value is not None and current_value != "":
+                continue
+            candidate_value = getattr(incoming, field_name)
+            if candidate_value is not None and candidate_value != "":
+                fill[field_name] = candidate_value
+        if not fill:
+            return existing
+        return existing.model_copy(update=fill)
 
 
 class ExperienceResolver(StructuredListResolver):

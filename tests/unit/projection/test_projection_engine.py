@@ -2,11 +2,11 @@
 
 import pytest
 
+from tests.unit.projection._builders import full_candidate, make_candidate
 from transformer.projection.canonical_projection import CanonicalProjection
 from transformer.projection.exceptions import UnknownProjectionTypeError
 from transformer.projection.projection_engine import ProjectionEngine
 from transformer.projection.projection_registry import ProjectionRegistry
-from tests.unit.projection._builders import full_candidate, make_candidate
 
 
 class TestProjectionEngine:

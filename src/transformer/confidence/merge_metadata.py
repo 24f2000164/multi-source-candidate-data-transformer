@@ -73,24 +73,69 @@ class StaticMergeMetadata:
     Unknown field keys resolve to "no conflict, no contributors" rather than
     raising, satisfying the edge-case requirement that invalid/partial
     metadata must not raise.
+
+    A field name with no direct record (e.g. the bare ``"contact"`` field,
+    which the merge engine never records directly -- only its dotted
+    sub-fields such as ``"contact.email"``/``"contact.phone"`` are
+    recorded) is treated as a synthetic aggregate: it is resolved by
+    unioning the conflict/contributor/considered data of every recorded
+    ``"contact.*"`` sub-field, so a parent field is never silently scored
+    as "no sources considered" just because only its children were
+    individually tracked.
     """
 
     _fields: dict[str, _FieldMergeView]
 
     def field_conflict(self, field: str) -> bool:
         """See ``MergeMetadata.field_conflict``."""
-        view = self._fields.get(field)
+        view = self._resolve(field)
         return view.conflict if view is not None else False
 
     def contributing_source_count(self, field: str) -> int:
         """See ``MergeMetadata.contributing_source_count``."""
-        view = self._fields.get(field)
+        view = self._resolve(field)
         return len(view.contributing_sources) if view is not None else 0
 
     def sources_considered(self, field: str) -> tuple[DataSource, ...]:
         """See ``MergeMetadata.sources_considered``."""
-        view = self._fields.get(field)
+        view = self._resolve(field)
         return view.sources_considered if view is not None else ()
+
+    def _resolve(self, field: str) -> _FieldMergeView | None:
+        """Look up ``field`` directly, falling back to its dotted children.
+
+        Args:
+            field: Canonical field name, possibly a parent of dotted
+                sub-fields (e.g. ``"contact"`` for ``"contact.email"``).
+
+        Returns:
+            The directly-recorded view if present; otherwise a synthetic
+            view aggregated from every ``f"{field}."``-prefixed sub-field
+            that was recorded; ``None`` if neither exists.
+        """
+        view = self._fields.get(field)
+        if view is not None:
+            return view
+
+        prefix = f"{field}."
+        children = [v for k, v in self._fields.items() if k.startswith(prefix)]
+        if not children:
+            return None
+
+        contributing: list[DataSource] = []
+        considered: list[DataSource] = []
+        for child in children:
+            for source in child.contributing_sources:
+                if source not in contributing:
+                    contributing.append(source)
+            for source in child.sources_considered:
+                if source not in considered:
+                    considered.append(source)
+        return _FieldMergeView(
+            conflict=any(child.conflict for child in children),
+            contributing_sources=tuple(contributing),
+            sources_considered=tuple(considered),
+        )
 
 
 def from_merge_report(report: object) -> MergeMetadata:

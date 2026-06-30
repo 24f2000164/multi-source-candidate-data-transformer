@@ -1,0 +1,30 @@
+{
+  "candidate_id": "ATS-10293",
+  "first_name": "Jane",
+  "last_name": "Carter",
+  "email": "jane.carter@acme-hr.com",
+  "phone": "+1 415 555 0192",
+  "location": "San Francisco, CA",
+  "linkedin_url": "https://linkedin.com/in/janecarter",
+  "skills": ["Python", "AWS", "Terraform"],
+  "experience": [
+    {
+      "company": "Acme Corp",
+      "title": "Senior Software Engineer",
+      "start_date": "2022-01-01",
+      "end_date": null,
+      "description": "Leads platform engineering team."
+    }
+  ],
+  "education": [
+    {
+      "institution": "University of California, Berkeley",
+      "degree": "B.S.",
+      "field_of_study": "Computer Science",
+      "start_date": "2015-08-01",
+      "end_date": "2019-05-01"
+    }
+  ],
+  "certifications": [],
+  "languages": ["English"]
+}
