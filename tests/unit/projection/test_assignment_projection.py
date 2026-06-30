@@ -26,9 +26,7 @@ class TestAssignmentProjection:
     def test_includes_only_configured_fields(self, tmp_path: Path) -> None:
         rules_path = _write_rules(
             tmp_path,
-            "fields:\n"
-            "  first_name:\n"
-            "    output: firstName\n",
+            "fields:\n" "  first_name:\n" "    output: firstName\n",
         )
         candidate = full_candidate()
         result = AssignmentProjection(rules_path=rules_path).project(candidate)
@@ -38,9 +36,7 @@ class TestAssignmentProjection:
     def test_renames_fields(self, tmp_path: Path) -> None:
         rules_path = _write_rules(
             tmp_path,
-            "fields:\n"
-            "  last_name:\n"
-            "    output: surname\n",
+            "fields:\n" "  last_name:\n" "    output: surname\n",
         )
         candidate = make_candidate(last_name="Smith")
         result = AssignmentProjection(rules_path=rules_path).project(candidate)
@@ -50,9 +46,7 @@ class TestAssignmentProjection:
     def test_nested_path_resolution(self, tmp_path: Path) -> None:
         rules_path = _write_rules(
             tmp_path,
-            "fields:\n"
-            "  contact.email:\n"
-            "    output: email\n",
+            "fields:\n" "  contact.email:\n" "    output: email\n",
         )
         candidate = full_candidate()
         result = AssignmentProjection(rules_path=rules_path).project(candidate)
@@ -62,9 +56,7 @@ class TestAssignmentProjection:
     def test_missing_optional_field_is_omitted(self, tmp_path: Path) -> None:
         rules_path = _write_rules(
             tmp_path,
-            "fields:\n"
-            "  contact.email:\n"
-            "    output: email\n",
+            "fields:\n" "  contact.email:\n" "    output: email\n",
         )
         candidate = make_candidate(contact=None)
         result = AssignmentProjection(rules_path=rules_path).project(candidate)
@@ -80,9 +72,7 @@ class TestAssignmentProjection:
     def test_rule_without_output_key_raises(self, tmp_path: Path) -> None:
         rules_path = _write_rules(
             tmp_path,
-            "fields:\n"
-            "  first_name:\n"
-            "    something_else: x\n",
+            "fields:\n" "  first_name:\n" "    something_else: x\n",
         )
 
         with pytest.raises(ProjectionError):
@@ -91,9 +81,7 @@ class TestAssignmentProjection:
     def test_does_not_mutate_candidate(self, tmp_path: Path) -> None:
         rules_path = _write_rules(
             tmp_path,
-            "fields:\n"
-            "  first_name:\n"
-            "    output: firstName\n",
+            "fields:\n" "  first_name:\n" "    output: firstName\n",
         )
         candidate = full_candidate()
         before = candidate.model_dump(mode="json")
