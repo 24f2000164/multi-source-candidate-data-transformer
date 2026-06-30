@@ -253,6 +253,32 @@ class TestCandidateSchemaVersion:
 
 
 @pytest.mark.unit
+class TestCandidateExternalId:
+    """Tests for the external_id field (Sprint 02 addition)."""
+
+    def test_default_external_id_is_none(self) -> None:
+        c = _make_candidate()
+        assert c.external_id is None
+
+    def test_custom_external_id(self) -> None:
+        c = _make_candidate(external_id="ATS-1001")
+        assert c.external_id == "ATS-1001"
+
+    def test_external_id_is_stripped(self) -> None:
+        c = _make_candidate(external_id="  ATS-1001  ")
+        assert c.external_id == "ATS-1001"
+
+    def test_blank_external_id_raises(self) -> None:
+        with pytest.raises(ValidationError):
+            _make_candidate(external_id="   ")
+
+    def test_external_id_distinct_from_internal_id(self) -> None:
+        c = _make_candidate(external_id="ATS-1001")
+        assert isinstance(c.id, UUID)
+        assert c.external_id != str(c.id)
+
+
+@pytest.mark.unit
 class TestCandidateImmutability:
     """Immutability tests for the Candidate root model."""
 

@@ -24,6 +24,7 @@ class Candidate(BaseModel):
         id: Unique identifier for this canonical record.
         first_name: Candidate's first (given) name.
         last_name: Candidate's last (family) name.
+        external_id: Opaque identifier from an external source system.
         contact: Contact details (email, phone, URLs, location).
         experiences: Ordered list of work experience entries.
         education: Ordered list of academic credentials.
@@ -43,6 +44,13 @@ class Candidate(BaseModel):
     )
     first_name: str = Field(..., description="Candidate's first name.")
     last_name: str = Field(..., description="Candidate's last name.")
+    external_id: str | None = Field(
+        None,
+        description=(
+            "Opaque identifier assigned by an external source system "
+            "(e.g. ATS candidate_id). Distinct from the internal UUID `id`."
+        ),
+    )
     contact: ContactInfo | None = Field(None, description="Contact information.")
     experiences: list[WorkExperience] = Field(
         default_factory=list,
@@ -96,6 +104,24 @@ class Candidate(BaseModel):
         Raises:
             ValueError: If the name is blank after stripping.
         """
+        return strip_non_empty(v)
+
+    @field_validator("external_id", mode="before")
+    @classmethod
+    def _validate_external_id(cls, v: Any) -> Any:
+        """Strip whitespace and reject blank external_id strings.
+
+        Args:
+            v: Raw field value.
+
+        Returns:
+            Stripped string, or ``None`` if ``v`` is ``None``.
+
+        Raises:
+            ValueError: If a non-``None`` value is blank after stripping.
+        """
+        if v is None:
+            return v
         return strip_non_empty(v)
 
     @field_validator("schema_version", mode="before")

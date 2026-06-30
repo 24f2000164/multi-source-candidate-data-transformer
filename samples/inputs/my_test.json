@@ -1,0 +1,20 @@
+{
+  "candidate_id": "ATS-9001",
+  "first_name": "Sahil",
+  "last_name": "Sharma",
+  "email": "sahil@example.com",
+  "phone": "9876543210",
+  "skills": ["Python", "FastAPI", "Docker"],
+  "experience": [
+    {
+      "company": "Accenture",
+      "title": "Advanced Application Engineering Analyst",
+      "start_date": "2024-01-01"
+    }
+  ],
+  "education": [
+    {"institution": "IIT Madras", "degree": "BS Data Science"}
+  ],
+  "certifications": [{"name": "Udacity Agentic AI"}],
+  "languages": ["English", "Hindi"]
+}
