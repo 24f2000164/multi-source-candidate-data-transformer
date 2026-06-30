@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="260" viewBox="0 0 1200 260" role="img" aria-labelledby="title desc">
+  <title id="title">Full transformation pipeline</title>
+  <desc id="desc">ATS and resume parsing feed normalization, merge, confidence, validation, and projection stages.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#475569"/>
+    </marker>
+    <style>
+      .box { fill: #f8fafc; stroke: #475569; stroke-width: 2; rx: 9; }
+      .source { fill: #e0f2fe; stroke: #0369a1; }
+      .text { font: 14px system-ui, sans-serif; fill: #0f172a; text-anchor: middle; dominant-baseline: middle; }
+      .line { stroke: #475569; stroke-width: 2; fill: none; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect width="1200" height="260" fill="#ffffff"/>
+  <rect class="box source" x="20" y="35" width="150" height="55"/>
+  <text class="text" x="95" y="63">ATS parser</text>
+  <rect class="box source" x="20" y="165" width="150" height="55"/>
+  <text class="text" x="95" y="193">Resume parser</text>
+  <rect class="box" x="220" y="100" width="150" height="60"/>
+  <text class="text" x="295" y="130">Normalization</text>
+  <rect class="box" x="420" y="100" width="130" height="60"/>
+  <text class="text" x="485" y="130">Merge</text>
+  <rect class="box" x="600" y="100" width="140" height="60"/>
+  <text class="text" x="670" y="130">Confidence</text>
+  <rect class="box" x="790" y="100" width="140" height="60"/>
+  <text class="text" x="860" y="130">Validation</text>
+  <rect class="box source" x="980" y="100" width="160" height="60"/>
+  <text class="text" x="1060" y="130">Projection</text>
+  <path class="line" d="M170 62 L195 62 L195 115 L220 115"/>
+  <path class="line" d="M170 192 L195 192 L195 145 L220 145"/>
+  <line class="line" x1="370" y1="130" x2="420" y2="130"/>
+  <line class="line" x1="550" y1="130" x2="600" y2="130"/>
+  <line class="line" x1="740" y1="130" x2="790" y2="130"/>
+  <line class="line" x1="930" y1="130" x2="980" y2="130"/>
+</svg>
