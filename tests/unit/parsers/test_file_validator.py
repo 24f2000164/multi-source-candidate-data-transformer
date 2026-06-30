@@ -1,8 +1,8 @@
 """Unit tests for transformer.parsers.file_validator."""
 
 import os
-import sys
 from pathlib import Path
+import sys
 
 import pytest
 

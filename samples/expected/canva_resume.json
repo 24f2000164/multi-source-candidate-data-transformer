@@ -1,0 +1,51 @@
+{
+  "first_name": "Rachelle",
+  "last_name": "Beaudry",
+  "external_id": null,
+  "contact": {
+    "email": "hello@reallygreatsite.com",
+    "phone": "+1234567890",
+    "location": null,
+    "linkedin_url": null,
+    "github_url": null,
+    "website": "www.reallygreatsite.com"
+  },
+  "experiences": [
+    {
+      "company": "Studio Showde",
+      "title": "Graphic Designer",
+      "start_date": "2023-03",
+      "end_date": "2026-03"
+    },
+    {
+      "company": "Salford & Co.",
+      "title": "Junior Graphic Designer",
+      "start_date": "2022-02",
+      "end_date": "2023-02"
+    }
+  ],
+  "education": [
+    {
+      "institution": "Rimberio High School",
+      "degree": "Visual Communication Design"
+    },
+    {
+      "institution": "Borcelle University",
+      "degree": "Visual Communication Design"
+    }
+  ],
+  "skills": [
+    "Graphic Design",
+    "Visual Branding",
+    "Illustrator",
+    "Social Media Content",
+    "UI/UX Basic Design",
+    "Typography"
+  ],
+  "languages": [
+    "Indonesian",
+    "English"
+  ],
+  "confidence": null,
+  "schema_version": "1.0"
+}

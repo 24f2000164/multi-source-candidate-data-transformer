@@ -1,0 +1,44 @@
+{
+  "first_name": "Sherlock",
+  "last_name": "Holmes",
+  "contact": {
+    "email": "sherlock.holmes@detective.com",
+    "phone": "+44 20 7224 3688",
+    "location": "London"
+  },
+  "education": [
+    {
+      "institution": "University of Cambridge",
+      "degree": "Bachelor of Science"
+    },
+    {
+      "institution": "Eton College",
+      "degree": "High School Diploma"
+    }
+  ],
+  "experiences": [
+    {
+      "company": "Self Employed",
+      "title": "Private Detective"
+    },
+    {
+      "company": "Scotland Yard",
+      "title": "Consultant Detective"
+    }
+  ],
+  "skills": [
+    "Observation",
+    "Forensic Science",
+    "Logical Reasoning",
+    "Disguise",
+    "Martial Arts",
+    "Violin Playing"
+  ],
+  "languages": [
+    "English",
+    "French",
+    "German"
+  ],
+  "confidence": null,
+  "schema_version": "1.0"
+}

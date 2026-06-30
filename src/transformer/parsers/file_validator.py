@@ -24,18 +24,27 @@ class FileValidator:
     threads.
     """
 
-    def validate(self, path: Path, config: ParserConfig) -> None:
-        """Validate that ``path`` is safe to read and parse as JSON.
+    def validate(
+        self,
+        path: Path,
+        config: ParserConfig,
+        allowed_extensions: frozenset[str] | None = None,
+    ) -> None:
+        """Validate that ``path`` is safe to read and parse.
 
         Args:
-            path: Filesystem path to the candidate ATS JSON file.
+            path: Filesystem path to the candidate source file.
             config: Parser configuration controlling the size limit.
+            allowed_extensions: Extensions permitted for this call.
+                Defaults to ``{".json"}`` to preserve existing ATS parser
+                behaviour unchanged.
 
         Raises:
             FileReadError: If the path does not exist, is not a regular
                 file, has a disallowed extension, exceeds the configured
                 maximum size, or cannot be read due to a permissions error.
         """
+        extensions = allowed_extensions or _ALLOWED_EXTENSIONS
         resolved = self._resolve_safe_path(path)
 
         if not resolved.exists():
@@ -46,7 +55,7 @@ class FileValidator:
             logger.warning("ats_file_not_regular_file", extra={"path": str(resolved)})
             raise FileReadError(f"Not a regular file: {resolved.name}")
 
-        if resolved.suffix.lower() not in _ALLOWED_EXTENSIONS:
+        if resolved.suffix.lower() not in extensions:
             logger.warning(
                 "ats_file_invalid_extension",
                 extra={"path": str(resolved), "suffix": resolved.suffix},

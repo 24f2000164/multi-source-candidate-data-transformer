@@ -1,0 +1,40 @@
+{
+  "first_name": "Chandler",
+  "last_name": "Po",
+  "contact": {
+    "email": "chandler.po@email.com",
+    "phone": "(123) 456-7890",
+    "location": "San Francisco, CA"
+  },
+  "education": [
+    {
+      "institution": "UCLA",
+      "degree": "Bachelor of Science",
+      "field_of_study": "Biology"
+    }
+  ],
+  "experiences": [
+    {
+      "company": "Rockefeller University",
+      "title": "Biology Research Assistant"
+    },
+    {
+      "company": "New York University",
+      "title": "Biology Research Assistant"
+    },
+    {
+      "company": "Varsity Tutors",
+      "title": "Biology Tutor"
+    }
+  ],
+  "skills": [
+    "Biology Research",
+    "Written Communication",
+    "Presentation",
+    "Teaching"
+  ],
+  "certifications": [],
+  "languages": [],
+  "confidence": null,
+  "schema_version": "1.0"
+}

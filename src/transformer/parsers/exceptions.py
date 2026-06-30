@@ -55,3 +55,24 @@ class MappingError(ParserError):
     and invalid required nested objects (e.g. an experience entry missing a
     required field).
     """
+
+
+class UnsupportedFormatError(ParserError):
+    """Raised when a resume file extension is not supported by this parser."""
+
+
+class CorruptedFileError(ParserError):
+    """Raised when a resume file cannot be opened/parsed by its declared format.
+
+    Covers: encrypted/password-protected PDFs, extension/content mismatches
+    (e.g. a ``.pdf`` file that is actually a DOCX zip, or vice versa), and
+    any other library-level open failure.
+    """
+
+
+class TextExtractionError(ParserError):
+    """Raised when no usable text can be extracted from a resume file.
+
+    Covers: image-only (scanned, no text layer) PDFs and otherwise blank
+    documents.
+    """

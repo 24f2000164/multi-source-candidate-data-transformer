@@ -1,0 +1,47 @@
+{
+  "first_name": "Sahil",
+  "last_name": "Kumar",
+  "external_id": null,
+  "contact": {
+    "email": "24f2000164@ds.study.iitm.ac.in",
+    "phone": "+91-7668470448",
+    "location": "Uttarakhand, India",
+    "linkedin_url": "linkedin.com/in/sahil-kumar-1645a3324",
+    "github_url": "github.com/24f2000164"
+  },
+  "experiences": [],
+  "education": [
+    {
+      "institution": "Indian Institute of Technology Madras",
+      "degree": "Bachelor of Science",
+      "field_of_study": "Data Science and Applications"
+    },
+    {
+      "institution": "National Institute of Technology Uttarakhand",
+      "degree": "Bachelor of Technology",
+      "field_of_study": "Electronics and Communication Engineering"
+    }
+  ],
+  "skills": [
+    "Python",
+    "C",
+    "SQL",
+    "Flask",
+    "FastAPI",
+    "REST APIs",
+    "SQLAlchemy",
+    "MySQL",
+    "PostgreSQL",
+    "Machine Learning",
+    "LangChain",
+    "RAG",
+    "Docker",
+    "Git",
+    "GitHub"
+  ],
+  "certifications": [],
+  "languages": [],
+  "confidence": null,
+  "provenance": {},
+  "schema_version": "1.0"
+}

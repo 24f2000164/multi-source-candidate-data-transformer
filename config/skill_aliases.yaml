@@ -1,0 +1,38 @@
+# Skill alias configuration.
+#
+# Keys are matched case-insensitively against cleaned skill strings; values
+# are the canonical display form written into the Candidate. Manually
+# curated -- coverage is intentionally incomplete and should grow as new
+# variants are observed (see IMPLEMENTATION_PLAN risk: "Skill alias table is
+# manually curated -- incomplete coverage").
+
+aliases:
+  js: "JavaScript"
+  javascript: "JavaScript"
+  ts: "TypeScript"
+  typescript: "TypeScript"
+  py: "Python"
+  python: "Python"
+  golang: "Go"
+  go: "Go"
+  reactjs: "React"
+  react.js: "React"
+  react: "React"
+  nodejs: "Node.js"
+  node.js: "Node.js"
+  node: "Node.js"
+  postgres: "PostgreSQL"
+  postgresql: "PostgreSQL"
+  k8s: "Kubernetes"
+  kubernetes: "Kubernetes"
+  aws: "AWS"
+  amazon web services: "AWS"
+  gcp: "GCP"
+  google cloud platform: "GCP"
+  ml: "Machine Learning"
+  machine learning: "Machine Learning"
+  ai: "Artificial Intelligence"
+  csharp: "C#"
+  c#: "C#"
+  cplusplus: "C++"
+  c++: "C++"

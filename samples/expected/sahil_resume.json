@@ -1,0 +1,55 @@
+{
+  "first_name": "Sahil",
+  "last_name": "Kumar",
+  "external_id": null,
+  "contact": {
+    "email": "24f2000164@ds.study.iitm.ac.in",
+    "phone": "+91-7668470448",
+    "location": "Uttarakhand, India",
+    "linkedin_url": "<linkedin-url>",
+    "github_url": "<github-url>"
+  },
+  "experiences": [
+    {
+      "company": "Accenture India",
+      "title": "Custom Software Engineering Associate Intern (GenAI Integration)",
+      "start_date": "2026-05-01",
+      "end_date": null,
+      "description": "Architected production-grade Retrieval-Augmented Generation (RAG) pipelines using LangChain and ChromaDB over enterprise document corpora."
+    }
+  ],
+  "education": [
+    {
+      "institution": "Indian Institute of Technology Madras",
+      "degree": "Bachelor of Science",
+      "field_of_study": "Data Science and Applications"
+    },
+    {
+      "institution": "National Institute of Technology Uttarakhand",
+      "degree": "Bachelor of Technology",
+      "field_of_study": "Electronics and Communication Engineering"
+    }
+  ],
+  "skills": [
+    "Python",
+    "SQL",
+    "C",
+    "Scikit-Learn",
+    "PyTorch",
+    "Transformers",
+    "LangChain",
+    "Docker",
+    "AWS",
+    "Amazon Bedrock",
+    "Git",
+    "ChromaDB",
+    "FAISS",
+    "Prompt Engineering",
+    "RAG"
+  ],
+  "certifications": [],
+  "languages": [],
+  "confidence": null,
+  "provenance": {},
+  "schema_version": "1.0"
+}

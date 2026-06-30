@@ -1,0 +1,50 @@
+{
+  "first_name": "Johann",
+  "last_name": "Müller",
+  "external_id": null,
+  "contact": {
+    "email": "j.mueller@gmail.com",
+    "phone": "+49 123456789",
+    "location": "Berlin, Germany",
+    "linkedin_url": null,
+    "github_url": null
+  },
+  "experiences": [
+    {
+      "company": "BNP Paribas",
+      "title": "Junior Accountant",
+      "start_date": "2018-10",
+      "end_date": null
+    },
+    {
+      "company": "Siemens AG",
+      "title": "Accounting Intern",
+      "start_date": "2018-06",
+      "end_date": "2018-09"
+    }
+  ],
+  "education": [
+    {
+      "institution": "University of Munich",
+      "degree": "Bachelor of Science in Accounting"
+    }
+  ],
+  "skills": [
+    "Microsoft Office",
+    "Excel",
+    "PowerPoint",
+    "SAP Accounting",
+    "Google Workspace",
+    "SQL",
+    "QuickBooks"
+  ],
+  "languages": [
+    "German",
+    "English",
+    "French"
+  ],
+  "certifications": [],
+  "confidence": null,
+  "provenance": {},
+  "schema_version": "1.0"
+}

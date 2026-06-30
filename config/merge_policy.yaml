@@ -1,0 +1,84 @@
+# Merge policy configuration.
+#
+# Defines, per canonical field, which merge strategy to use and the
+# source-priority order to apply within that strategy. This file is the
+# single source of truth for merge behaviour -- the merge engine never
+# hardcodes field-specific priority rules (see IMPLEMENTATION_PLAN Sprint 5
+# / "Move merge priorities into configurable YAML rules").
+#
+# strategy: one of
+#   source_priority   -- pick the highest-priority non-empty source value;
+#                         flags a conflict if multiple sources disagree.
+#   first_non_empty    -- pick the first non-empty value found while
+#                         scanning sources in priority order; does not flag
+#                         disagreement between non-empty values as loudly.
+#   union               -- merge list values together (case-insensitive
+#                         dedup for flat lists, identity-key dedup for
+#                         structured lists).
+#   highest_confidence  -- pick the value carrying the highest field
+#                         confidence score (falls back to source_priority
+#                         when confidence is unavailable).
+#
+# priority: ordered list of DataSource values, highest priority first.
+# identity_keys: for `union` on structured lists only -- the field names
+#   used to determine whether two entries from different sources represent
+#   the "same" real-world item.
+
+default_strategy: source_priority
+default_priority: [ATS, RESUME]
+
+fields:
+  external_id:
+    strategy: source_priority
+    priority: [ATS, RESUME]
+
+  first_name:
+    strategy: source_priority
+    priority: [ATS, RESUME]
+
+  last_name:
+    strategy: source_priority
+    priority: [ATS, RESUME]
+
+  contact.email:
+    strategy: source_priority
+    priority: [ATS, RESUME]
+
+  contact.phone:
+    strategy: source_priority
+    priority: [ATS, RESUME]
+
+  contact.location:
+    strategy: first_non_empty
+    priority: [ATS, RESUME]
+
+  contact.linkedin_url:
+    strategy: first_non_empty
+    priority: [RESUME, ATS]
+
+  contact.github_url:
+    strategy: first_non_empty
+    priority: [RESUME, ATS]
+
+  skills:
+    strategy: union
+    priority: [RESUME, ATS]
+
+  languages:
+    strategy: union
+    priority: [ATS, RESUME]
+
+  certifications:
+    strategy: union
+    priority: [ATS, RESUME]
+    identity_keys: [name, issuer]
+
+  experiences:
+    strategy: union
+    priority: [ATS, RESUME]
+    identity_keys: [company, title, start_date]
+
+  education:
+    strategy: union
+    priority: [ATS, RESUME]
+    identity_keys: [institution, degree]
