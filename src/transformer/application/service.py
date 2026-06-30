@@ -177,7 +177,8 @@ class ApplicationService:
             raise InvalidJSONError(
                 f"file does not contain valid JSON: {path.name}"
             ) from exc
-        return Candidate.model_validate(data)
+        payload = data.get("candidate", data)
+        return Candidate.model_validate(payload)
 
     @staticmethod
     def _ensure_exists(path: Path) -> None:
