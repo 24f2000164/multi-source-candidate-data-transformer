@@ -380,7 +380,7 @@ class ResumeParser(BaseParser):
         carry the date:
 
         1. **Same-line mixed text + date** (e.g. ``"Software Engineer,
-           Google — Jan 2022 – Present"``): the date substring is located
+           Google — Jan 2022 - Present"``): the date substring is located
            and stripped out of the line first (rather than assuming a
            date always occupies its own line), and the remaining text is
            classified into title/company via
@@ -429,7 +429,7 @@ class ResumeParser(BaseParser):
                 span = extractors.extract_date_span(line)
                 if span is not None:
                     start_off, end_off, start, end = span
-                    remainder = (line[:start_off] + line[end_off:]).strip(" ,-—–|")
+                    remainder = (line[:start_off] + line[end_off:]).strip(" ,-—|")
                     same_line_date = (start, end)
                     same_line_remainder = remainder or None
                     i += 1
@@ -556,9 +556,7 @@ class ResumeParser(BaseParser):
         title = header_lines[-1]
         return company, title
 
-    _TRAILING_LOCATION_RE = re.compile(
-        r"\s{2,}[A-Z][A-Za-z.\s]+,\s*[A-Za-z.\s]+$"
-    )
+    _TRAILING_LOCATION_RE = re.compile(r"\s{2,}[A-Z][A-Za-z.\s]+,\s*[A-Za-z.\s]+$")
 
     @classmethod
     def _strip_trailing_location(cls, company: str) -> str:

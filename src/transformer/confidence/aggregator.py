@@ -120,9 +120,7 @@ class ConfidenceAggregator:
             )
 
             if not field_excluded:
-                weight = self._field_weights.get(
-                    field_name, self._default_field_weight
-                )
+                weight = self._field_weights.get(field_name, self._default_field_weight)
                 weighted_sum += running_score * weight
                 weight_total += weight
 

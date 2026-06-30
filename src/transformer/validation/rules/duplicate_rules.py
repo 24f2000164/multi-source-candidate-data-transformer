@@ -51,8 +51,7 @@ class DuplicateExperienceRule:
         seen: set[str] = set()
         for i, exp in enumerate(candidate.experiences):
             key = "|".join(
-                _normalize_key_part(v)
-                for v in (exp.company, exp.title, exp.start_date)
+                _normalize_key_part(v) for v in (exp.company, exp.title, exp.start_date)
             )
             if key in seen:
                 issues.append(

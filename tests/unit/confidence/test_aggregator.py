@@ -67,9 +67,7 @@ def test_overall_score_is_zero_when_all_fields_missing() -> None:
 def test_field_weights_affect_overall_average() -> None:
     candidate = make_candidate(skills=["python"])
     metadata = from_single_source(DataSource.ATS)
-    aggregator = _default_aggregator(
-        field_weights={"first_name": 10.0, "skills": 0.0}
-    )
+    aggregator = _default_aggregator(field_weights={"first_name": 10.0, "skills": 0.0})
     field_scores, overall, _, _, _ = aggregator.aggregate(
         candidate, metadata, ["first_name", "skills"], _SOURCE_WEIGHTS
     )

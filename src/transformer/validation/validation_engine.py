@@ -15,9 +15,7 @@ class ValidationEngine:
     requires adding the rule to the registry's construction.
     """
 
-    def __init__(
-        self, registry: RuleRegistry, *, config_version: str = ""
-    ) -> None:
+    def __init__(self, registry: RuleRegistry, *, config_version: str = "") -> None:
         """Initialise the engine with its rule registry.
 
         Args:

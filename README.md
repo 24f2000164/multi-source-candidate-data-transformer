@@ -179,7 +179,7 @@ candidate-transformer parse samples/resumes/jane_carter_resume.docx
 ```
 
 and compare the result against
-[`samples/expected/jane_carter_resume.expected.json`](samples/expected/jane_carter_resume.expected.json).
+[`samples/expected/jane_carter_resume.expected.json`](samples/expected/jane_carter_resume.json).
 
 ## Configuration
 

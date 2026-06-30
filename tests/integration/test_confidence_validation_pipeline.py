@@ -163,9 +163,7 @@ def test_two_hundred_experience_candidate_duplicate_rule_runs_quickly() -> None:
         )
         for i in range(200)
     ]
-    candidate = Candidate(
-        first_name="Jane", last_name="Doe", experiences=experiences
-    )
+    candidate = Candidate(first_name="Jane", last_name="Doe", experiences=experiences)
     start = time.perf_counter()
     report = _validation_engine().run(candidate)
     elapsed = time.perf_counter() - start

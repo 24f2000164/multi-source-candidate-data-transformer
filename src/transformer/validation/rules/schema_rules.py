@@ -108,9 +108,7 @@ class ConfidenceValueRule:
             return []
 
         issues: list[ValidationIssue] = []
-        issues.extend(
-            self._check_score("confidence.score", candidate.confidence.score)
-        )
+        issues.extend(self._check_score("confidence.score", candidate.confidence.score))
         for field_name, field_confidence in candidate.confidence.fields.items():
             issues.extend(
                 self._check_score(
@@ -175,7 +173,7 @@ class StringLengthRule:
         for i, exp in enumerate(candidate.experiences):
             candidates_to_check.append(
                 (f"experiences[{i}].description", exp.description)
-                )
+            )
         for field, value in candidates_to_check:
             if value is not None and len(value) > self._max_length:
                 issues.append(

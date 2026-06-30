@@ -126,7 +126,7 @@ class TestEducationResolver:
         # ATS wins on identity (higher priority source), but gap-fill pulls
         # field_of_study from RESUME since ATS left it blank — Issue 2 fix.
         assert merged.institution == "MIT"  # ATS casing preserved
-        assert merged.degree == "BSc"       # ATS casing preserved
+        assert merged.degree == "BSc"  # ATS casing preserved
         assert merged.field_of_study == "CS"  # filled from RESUME
 
 

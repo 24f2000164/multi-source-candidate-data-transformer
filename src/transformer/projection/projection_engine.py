@@ -1,4 +1,4 @@
-"""``ProjectionEngine``: orchestrates a ``ProjectionRegistry`` against a ``Candidate``."""
+"""ProjectionEngine: orchestrates a ProjectionRegistry against a Candidate."""
 
 from typing import Any
 

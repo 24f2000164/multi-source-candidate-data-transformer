@@ -53,8 +53,7 @@ def test_license_is_mit() -> None:
 def test_pyproject_is_only_version_source() -> None:
     package_files = (ROOT / "src" / "transformer").rglob("*.py")
     assert all(
-        "__version__" not in path.read_text(encoding="utf-8")
-        for path in package_files
+        "__version__" not in path.read_text(encoding="utf-8") for path in package_files
     )
 
 

@@ -84,9 +84,7 @@ class ConfidenceEngine:
             scored_fields: Canonical (dotted) field names to score.
             config_version: Version string recorded in the resulting report.
         """
-        self._aggregator = ConfidenceAggregator(
-            strategies, field_weights=field_weights
-        )
+        self._aggregator = ConfidenceAggregator(strategies, field_weights=field_weights)
         self._source_weights = source_weights
         self._scored_fields = list(scored_fields)
         self._config_version = config_version

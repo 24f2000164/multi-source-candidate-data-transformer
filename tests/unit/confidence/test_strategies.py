@@ -37,18 +37,14 @@ def test_source_weight_uses_max_weight_among_sources() -> None:
             sources_considered=(DataSource.ATS, DataSource.RESUME),
         )
     )
-    result = SourceWeightStrategy().score(
-        _context(candidate, "first_name", metadata)
-    )
+    result = SourceWeightStrategy().score(_context(candidate, "first_name", metadata))
     assert result.delta == 0.7
 
 
 def test_source_weight_no_sources_considered() -> None:
     candidate = make_candidate()
     metadata = _metadata()
-    result = SourceWeightStrategy().score(
-        _context(candidate, "first_name", metadata)
-    )
+    result = SourceWeightStrategy().score(_context(candidate, "first_name", metadata))
     assert result.delta == 0.0
 
 

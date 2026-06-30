@@ -13,9 +13,7 @@ from transformer.validation.rules.cross_field_rules import (
 def test_date_order_rule_passes_for_ordered_dates() -> None:
     candidate = make_candidate(
         experiences=[
-            make_experience(
-                start_date=date(2020, 1, 1), end_date=date(2021, 1, 1)
-            )
+            make_experience(start_date=date(2020, 1, 1), end_date=date(2021, 1, 1))
         ]
     )
     assert DateOrderRule().check(candidate) == []

@@ -74,18 +74,17 @@ def extract_phone(text: str) -> str | None:
     return None
 
 
-
 def extract_date_span(text: str) -> tuple[int, int, str, str] | None:
     """Find the first date-range match in ``text`` and return its span.
- 
+
     Unlike ``extract_dates``, this also returns the character offsets of
     the match so a caller can remove the date substring from a line that
     mixes a date with other text (e.g. ``"Title, Company — Jan 2022 -
     Present"``).
- 
+
     Args:
         text: Plain text to search.
- 
+
     Returns:
         A ``(start, end, start_date, end_date)`` tuple for the first
         match, or ``None`` if no date range is found.
@@ -197,8 +196,7 @@ def extract_list_items(section_text: str) -> list[str]:
     """
     # 1. Pre-process: strip, drop lone integers, rejoin broken parens.
     raw_lines = [
-        _CATEGORY_PREFIX_RE.sub("", ln.strip())
-        for ln in section_text.splitlines()
+        _CATEGORY_PREFIX_RE.sub("", ln.strip()) for ln in section_text.splitlines()
     ]
     raw_lines = [ln for ln in raw_lines if ln and not _LONE_INTEGER_RE.match(ln)]
     raw_lines = _join_dangling_parens(raw_lines)

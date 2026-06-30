@@ -66,7 +66,7 @@ def test_unicode_confusable_rule_passes_for_plain_latin_name() -> None:
 
 
 def test_unicode_confusable_rule_flags_mixed_script_name() -> None:
-   # 'а' (U+0430 CYRILLIC SMALL LETTER A) mixed with Latin letters.  # noqa: RUF003
+    # 'а' (U+0430 CYRILLIC SMALL LETTER A) mixed with Latin letters.  # noqa: RUF003
     spoofed_name = "M\u0430ria"
     candidate = make_candidate(first_name=spoofed_name)
     issues = UnicodeConfusableRule().check(candidate)

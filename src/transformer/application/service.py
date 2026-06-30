@@ -164,13 +164,7 @@ class ApplicationService:
 
     @staticmethod
     def _load_candidate(path: Path) -> Candidate:
-        """Read canonical candidate JSON from disk.
-
-        Accepts either a bare ``Candidate`` object or an ``ApplicationResult``
-        envelope (the format written by ``transform --output``).  When the
-        envelope is detected the ``candidate`` field is unwrapped automatically,
-        making CLI commands composable without an intermediate extraction step.
-        """
+        """Read strict canonical candidate JSON from disk."""
         try:
             raw = path.read_text(encoding="utf-8")
         except OSError as exc:
@@ -183,11 +177,6 @@ class ApplicationService:
             raise InvalidJSONError(
                 f"file does not contain valid JSON: {path.name}"
             ) from exc
-
-        # Auto-unwrap ApplicationResult envelope produced by `transform --output`
-        if isinstance(data, dict) and "candidate" in data and "success" in data:
-            data = data["candidate"]
-
         return Candidate.model_validate(data)
 
     @staticmethod

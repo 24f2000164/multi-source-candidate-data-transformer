@@ -27,6 +27,4 @@ def make_experience(
     *, company: str = "Acme", title: str = "Engineer"
 ) -> WorkExperience:
     """Build a minimal ``WorkExperience`` for confidence-engine tests."""
-    return WorkExperience(
-        company=company, title=title, start_date=date(2020, 1, 1)
-    )
+    return WorkExperience(company=company, title=title, start_date=date(2020, 1, 1))
